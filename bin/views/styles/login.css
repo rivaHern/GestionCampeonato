@@ -1,0 +1,77 @@
+.root-pane {
+    -fx-background-color: transparent;
+}
+
+.background {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0f1724 0%, #0b2540 60%);
+}
+
+.login-card {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-background-radius: 16;
+    -fx-padding: 48;
+    -fx-effect: dropshadow(gaussian, rgba(2,6,23,0.6), 30, 0.0, 0.0, 12.0);
+    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-border-width: 1;
+}
+
+.logo-circle {
+    -fx-fill: rgb(255, 255, 255);
+    -fx-stroke: rgba(255, 255, 255, 0.06);
+    -fx-stroke-width: 1;
+}
+
+.app-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 30px;
+    -fx-fill: #e6eef8;
+}
+
+.app-subtitle {
+    -fx-font-size: 13px;
+    -fx-fill: #bcd3ef;
+}
+
+.input-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #c9d8ee;
+}
+
+.input-field {
+    -fx-background-color: rgba(255,255,255,0.03);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(255,255,255,0.08);
+    -fx-border-radius: 8;
+    -fx-padding: 12;
+    -fx-text-fill: #e9f1ff;
+}
+
+.input-field:focused {
+    -fx-border-color: #60a5fa;
+    -fx-border-width: 2;
+}
+
+.login-button {
+    -fx-background-color: linear-gradient(#38bdf8, #0ea5e9);
+    -fx-text-fill: #04263b;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+}
+
+.login-button:hover {
+    -fx-background-color: linear-gradient(#2bb0e8, #0b93c4);
+}
+
+.forgot-link {
+    -fx-text-fill: #bcd3ef;
+}
+
+.forgot-link:hover {
+    -fx-text-fill: #7dd3fc;
+}
+
+.version-text {
+    -fx-fill: rgba(188,211,239,0.7);
+    -fx-font-size: 11px;
+}

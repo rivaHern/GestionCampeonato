@@ -1,0 +1,421 @@
+/* ============================================================
+   MUNDIAL 2026 — Estilos principales
+   ============================================================ */
+
+/* Fondo general de la aplicación */
+.root-pane {
+    -fx-background-color: #060d1a;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+    -fx-background-color: linear-gradient(to bottom, #0b1629, #0d1e38);
+    -fx-border-color: rgba(125, 211, 252, 0.12);
+    -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 20, 0, 4, 0);
+}
+
+/* Título "Mundial 2026" */
+.sidebar-title {
+    -fx-fill: #f0f8ff;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI Semibold";
+}
+
+/* Etiquetas de sección: ADMINISTRACIÓN, GESTIÓN DE DATOS, etc. */
+.sidebar-section {
+    -fx-fill: #38bdf8;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI";
+}
+
+/* ============================================================
+   BOTONES DEL MENÚ
+   ============================================================ */
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b8d0ec;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-font-family: "Segoe UI";
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 10;
+    -fx-border-width: 0 0 0 3;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0 8 8 0;
+}
+
+.menu-button:hover {
+    -fx-background-color: linear-gradient(to right, rgba(56,189,248,0.18), rgba(56,189,248,0.04));
+    -fx-text-fill: #e8f4ff;
+    -fx-border-color: #38bdf8;
+    -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.2), 8, 0, 0, 0);
+}
+
+/* Botón de cerrar sesión */
+.logout-button {
+    -fx-background-color: rgba(220, 38, 38, 0.15);
+    -fx-background-insets: 0;
+    -fx-background-radius: 0 8 8 0;
+    -fx-text-fill: #fca5a5;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 10;
+    -fx-border-width: 0 0 0 3;
+    -fx-border-color: rgba(220, 38, 38, 0.5);
+}
+
+.logout-button:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.28);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #ef4444;
+    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.25), 8, 0, 0, 0);
+}
+
+/* ============================================================
+   ÁREA DE CONTENIDO CENTRAL
+   ============================================================ */
+.content-area {
+    -fx-background-color: linear-gradient(to bottom right, #060d1a, #0a1628, #0d1e38);
+}
+
+/* ============================================================
+   TIPOGRAFÍA GENERAL DE CONTENIDO
+   ============================================================ */
+.page-title {
+    -fx-fill: #f0f8ff;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.3), 12, 0, 0, 0);
+}
+
+/* Textos "Bienvenido, usuario" */
+Text {
+    -fx-fill: #b8d0ec;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 18px;
+}
+
+/* ============================================================
+   TARJETAS (cards)
+   ============================================================ */
+.card {
+    -fx-background-color: linear-gradient(to bottom right, rgba(255,255,255,0.09), rgba(255,255,255,0.04));
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(125,211,252,0.15);
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 14;
+    -fx-pref-height: 80;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 3);
+}
+
+.card-title {
+    -fx-fill: #94b8d9;
+    -fx-font-size: 11px;
+    -fx-font-family: "Segoe UI";
+    -fx-font-weight: normal;
+}
+
+.card-number {
+    -fx-fill: #f0f8ff;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI Semibold";
+}
+
+/* ============================================================
+   PANELES
+   ============================================================ */
+.panel {
+    -fx-background-color: linear-gradient(to bottom, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(125,211,252,0.1);
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-padding: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 12, 0, 0, 4);
+}
+
+.panel-title {
+    -fx-fill: #7dd3fc;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI Semibold";
+}
+
+.panel-item {
+    -fx-fill: #a0bcd8;
+    -fx-font-size: 12px;
+    -fx-font-family: "Segoe UI";
+}
+
+/* ============================================================
+   BOTONES DE ACCESO RÁPIDO (shortcuts)
+   ============================================================ */
+.shortcut {
+    -fx-pref-width: 130;
+    -fx-pref-height: 40;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+    -fx-background-color: transparent;
+}
+
+.shortcut.red    { -fx-border-color: #ef4444; -fx-text-fill: #ef4444; }
+.shortcut.blue   { -fx-border-color: #3b82f6; -fx-text-fill: #3b82f6; }
+.shortcut.green  { -fx-border-color: #22c55e; -fx-text-fill: #22c55e; }
+.shortcut.purple { -fx-border-color: #a855f7; -fx-text-fill: #a855f7; }
+.shortcut.orange { -fx-border-color: #f97316; -fx-text-fill: #f97316; }
+
+.shortcut:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.1), 8, 0, 0, 0);
+}
+
+/* ============================================================
+   BARRA DE INFO INFERIOR (usuario / fecha / hora)
+   ============================================================ */
+.info-bar-label {
+    -fx-fill: #38bdf8;
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI";
+    -fx-font-weight: bold;
+}
+
+.info-bar-value {
+    -fx-fill: #e8f4ff;
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-weight: bold;
+}
+
+/* ============================================================
+   TÍTULO DE SECCIÓN (GESTION DE USUARIOS, etc.)
+   ============================================================ */
+.section-title {
+    -fx-fill: #f0f8ff;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.35), 10, 0, 0, 0);
+}
+
+/* ============================================================
+   ETIQUETAS DE FORMULARIO
+   ============================================================ */
+.form-label {
+    -fx-fill: #7dd3fc;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI Semibold";
+}
+
+/* ============================================================
+   CAMPOS DE TEXTO (TextField / PasswordField)
+   ============================================================ */
+.text-field, .password-field {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(125,211,252,0.25);
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: #e8f4ff;
+    -fx-prompt-text-fill: rgba(125,211,252,0.45);
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-padding: 6 10 6 10;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #38bdf8;
+    -fx-background-color: rgba(56,189,248,0.08);
+    -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.25), 8, 0, 0, 0);
+}
+
+/* ============================================================
+   COMBO BOX
+   ============================================================ */
+.combo-box {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(125,211,252,0.25);
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #e8f4ff;
+    -fx-background-color: transparent;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #0d1e38;
+    -fx-border-color: rgba(125,211,252,0.25);
+    -fx-border-width: 1;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: rgba(56,189,248,0.15);
+    -fx-text-fill: #e8f4ff;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #38bdf8;
+}
+
+/* ============================================================
+   BOTONES DE ACCIÓN (Agregar, Actualizar, Eliminar)
+   ============================================================ */
+.action-button {
+    -fx-background-color: transparent;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 7 20 7 20;
+    -fx-cursor: hand;
+}
+
+.action-button.add {
+    -fx-border-color: #38bdf8;
+    -fx-text-fill: #38bdf8;
+}
+
+.action-button.add:hover {
+    -fx-background-color: rgba(56,189,248,0.15);
+    -fx-text-fill: #e8f4ff;
+    -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.3), 10, 0, 0, 0);
+}
+
+.action-button.update {
+    -fx-border-color: #22c55e;
+    -fx-text-fill: #22c55e;
+}
+
+.action-button.update:hover {
+    -fx-background-color: rgba(34,197,94,0.15);
+    -fx-text-fill: #e8f4ff;
+    -fx-effect: dropshadow(gaussian, rgba(34,197,94,0.3), 10, 0, 0, 0);
+}
+
+.action-button.delete {
+    -fx-border-color: #ef4444;
+    -fx-text-fill: #ef4444;
+}
+
+.action-button.delete:hover {
+    -fx-background-color: rgba(239,68,68,0.15);
+    -fx-text-fill: #e8f4ff;
+    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.3), 10, 0, 0, 0);
+}
+
+/* ============================================================
+   TABLE VIEW
+   ============================================================ */
+.table-view {
+    -fx-background-color: rgba(255,255,255,0.04);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(125,211,252,0.15);
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: rgba(56,189,248,0.12);
+    -fx-background-radius: 12 12 0 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-size: 36px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #7dd3fc;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: #b8d0ec;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-border-color: transparent transparent rgba(125,211,252,0.07) transparent;
+    -fx-alignment: CENTER;
+}
+
+.table-row-cell {
+    -fx-background-color: transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: rgba(255,255,255,0.025);
+}
+
+.table-row-cell:selected {
+    -fx-background-color: rgba(56,189,248,0.2);
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: #e8f4ff;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: rgba(56,189,248,0.08);
+}
+
+.table-view .placeholder .label {
+    -fx-text-fill: rgba(125,211,252,0.4);
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+}
+
+/* Scrollbar */
+.table-view .scroll-bar:vertical .thumb,
+.table-view .scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(56,189,248,0.3);
+    -fx-background-radius: 4;
+}
+
+.table-view .scroll-bar:vertical .track,
+.table-view .scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+}
+
+/* ============================================================
+   SEPARADOR
+   ============================================================ */
+.separator .line {
+    -fx-border-color: rgba(125,211,252,0.18);
+    -fx-border-width: 1;
+}
