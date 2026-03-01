@@ -30,7 +30,7 @@ public class MenuPrincipalAdministradorController {
 	@FXML
 	private AnchorPane admUsuariosPane;
 	@FXML
-	private AnchorPane bitacoraPane;
+	private AnchorPane admBitacoraPane;
 	@FXML
 	private AnchorPane equiposPane;
 	@FXML
@@ -46,24 +46,14 @@ public class MenuPrincipalAdministradorController {
 //	public void initialize() {
 //		mostrarInicio();
 //	}
-//
-//	private void mostrarInicio() {
-//		inicioPane.setVisible(true);
-//		admUsuariosPane.setVisible(false);
-//		bitacoraPane.setVisible(false);
-//		equiposPane.setVisible(false);
-//		jugadoresPane.setVisible(false);
-//		partidosPane.setVisible(false);
-//		consultasPane.setVisible(false);
-//		reportesPane.setVisible(false);
-//	}
+
 
 	  @FXML
 	    public void mostrarVentana(ActionEvent event) {
 	        // Ocultar todos los paneles
 	        inicioPane.setVisible(true);
 	        admUsuariosPane.setVisible(false);
-//	        bitacoraPane.setVisible(false);
+	        admBitacoraPane.setVisible(false);
 //	        equiposPane.setVisible(false);
 //	        jugadoresPane.setVisible(false);
 //	        partidosPane.setVisible(false);
@@ -74,10 +64,11 @@ public class MenuPrincipalAdministradorController {
 	        if (event.getSource() == btnUsuario) {
 	            admUsuariosPane.setVisible(true);
 	            inicioPane.setVisible(false);
+	        } else if (event.getSource() == btnBitacora) {
+	            admBitacoraPane.setVisible(true);
+	            inicioPane.setVisible(false);
 	        } 
-//	        else if (event.getSource() == btnBitacora) {
-//	            bitacoraPane.setVisible(true);
-//	        } else if (event.getSource() == btnEquipos) {
+//	            else if (event.getSource() == btnEquipos) {
 //	            equiposPane.setVisible(true);
 //	        } else if (event.getSource() == btnJugadores) {
 //	            jugadoresPane.setVisible(true);
@@ -88,6 +79,11 @@ public class MenuPrincipalAdministradorController {
 //	        } else if (event.getSource() == btnReportes) {
 //	            reportesPane.setVisible(true);
 //	        }
+	    }
+	  
+	  @FXML
+	    void CerrarSesion(ActionEvent event) {
+		  System.out.println("salir");
 	    }
 
 }
