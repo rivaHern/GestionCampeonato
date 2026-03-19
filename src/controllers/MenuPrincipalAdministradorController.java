@@ -106,4 +106,58 @@ public class MenuPrincipalAdministradorController {
             e.printStackTrace();
         }
     }
+	@FXML
+void AdmAgregar(ActionEvent event) {
+    System.out.println("Agregar usuario - pendiente implementar");
+}
+
+	@FXML
+	void AdmAgragar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmAgragar");
+	}
+
+	@FXML
+	void AdmActualizar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmActualizar");
+	}
+
+	@FXML
+	void AdmGUBuscar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmGUBuscar");
+	}
+
+	@FXML
+	void AdmEliminar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmEliminar");
+	}
+
+	@FXML
+	void AdmBitacoraBuscar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmBitacoraBuscar");
+	}
+
+	@FXML
+	void AdmBitacoraExportar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmBitacoraExportar");
+	}
+
+	@FXML
+	void AdmEquiposAgregar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmEquiposAgregar");
+	}
+
+	@FXML
+	void AdmEquiposActualizar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmEquiposActualizar");
+	}
+
+	@FXML
+	void AdmEquiposBuscar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmEquiposBuscar");
+	}
+
+	@FXML
+	void AdmEquiposEliminar(ActionEvent event) {
+		System.out.println("pendiente implementar - AdmEquiposEliminar");
+	}
 }
