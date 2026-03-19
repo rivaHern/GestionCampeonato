@@ -10,9 +10,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/menuPrincipalAdministrador.fxml"));
-            //FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
-            
+            //FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/menuPrincipalAdministrador.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);
             stage.setScene(scene);
@@ -24,6 +23,8 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
+        // Probar conexión antes de lanzar la app
+        Conexion.getConexion();
         launch(args);
     }
 }

@@ -15,7 +15,8 @@
 
 <AnchorPane id="root" fx:id="root" prefHeight="550.0"
 	prefWidth="850.0" styleClass="root-pane"
-	xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+	xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="controllers.LoginController">
 
 	<children>
 		<StackPane styleClass="background"
