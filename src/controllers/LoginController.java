@@ -1,5 +1,6 @@
 package controllers;
 
+<<<<<<< Updated upstream
 import application.Conexion;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -88,4 +89,45 @@ stage.show();
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
+=======
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+
+public class LoginController {
+
+    @FXML
+    private ResourceBundle resources;
+
+    @FXML
+    private URL location;
+
+    @FXML
+    private Button btnIngresar;
+
+    @FXML
+    private PasswordField claveLogin;
+
+    @FXML
+    private AnchorPane root;
+
+    @FXML
+    private TextField usuarioLogin;
+
+    @FXML
+    void ingresarLogin(ActionEvent event) {
+        
+    }
+
+    @FXML
+    void initialize() {
+
+    }
+
+>>>>>>> Stashed changes
 }

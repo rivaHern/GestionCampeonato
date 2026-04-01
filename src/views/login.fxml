@@ -13,25 +13,25 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
+<<<<<<< Updated upstream
 <AnchorPane id="root" fx:id="root" prefHeight="550.0"
 	prefWidth="850.0" styleClass="root-pane"
 	xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="controllers.LoginController">
+=======
+<AnchorPane id="root" fx:id="root" prefHeight="550.0" prefWidth="850.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoginController">
+>>>>>>> Stashed changes
 
 	<children>
-		<StackPane styleClass="background"
-			AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-			AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+		<StackPane styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 
-			<VBox alignment="CENTER" maxWidth="420.0" spacing="30.0"
-				styleClass="login-card">
+			<VBox alignment="CENTER" maxWidth="420.0" spacing="30.0" styleClass="login-card">
 
 				<children>
 
 					<StackPane prefWidth="334.0">
 						<children>
-							<ImageView fitHeight="151.0" fitWidth="159.0"
-								preserveRatio="true">
+							<ImageView fitHeight="151.0" fitWidth="159.0" preserveRatio="true">
 								<image>
 									<Image url="@icon/campeanto.png" />
 								</image>
@@ -54,22 +54,17 @@
 						<children>
 							<VBox spacing="5.0">
 								<Label styleClass="input-label" text="Usuario" />
-								<TextField fx:id="usuarioLogin"
-									promptText="Ingrese su usuario" styleClass="input-field" />
+								<TextField fx:id="usuarioLogin" promptText="Ingrese su usuario" styleClass="input-field" />
 							</VBox>
 
 							<VBox spacing="5.0">
 								<Label styleClass="input-label" text="Contraseña" />
-								<PasswordField fx:id="claveLogin"
-									promptText="Ingrese su contraseña" styleClass="input-field" />
+								<PasswordField fx:id="claveLogin" promptText="Ingrese su contraseña" styleClass="input-field" />
 							</VBox>
 						</children>
 					</VBox>
 
-					<Button fx:id="btnIngresar" alignment="BOTTOM_CENTER"
-						contentDisplay="RIGHT" maxWidth="Infinity"
-						onAction="#ingresarLogin" styleClass="login-button"
-						text="INGRESAR">
+					<Button fx:id="btnIngresar" alignment="BOTTOM_CENTER" contentDisplay="RIGHT" maxWidth="Infinity" onAction="#ingresarLogin" styleClass="login-button" text="INGRESAR">
 						<graphic>
 							<ImageView fitHeight="22.0" preserveRatio="true">
 								<image>

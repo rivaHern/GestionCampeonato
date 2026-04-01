@@ -10,12 +10,18 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         try {
+<<<<<<< Updated upstream
             //FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/menuPrincipalAdministrador.fxml"));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
+=======
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/administrador.fxml"));
+            // FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
+
+>>>>>>> Stashed changes
             Parent root = loader.load();
             Scene scene = new Scene(root);
             stage.setScene(scene);
-            stage.setTitle("Mundial 2026 - Administrador");
+            stage.setTitle("Mundial 2026");
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
