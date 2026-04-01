@@ -7,30 +7,27 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    @Override
-    public void start(Stage stage) {
-        try {
-<<<<<<< Updated upstream
-            //FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/menuPrincipalAdministrador.fxml"));
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
-=======
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/administrador.fxml"));
-            // FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
+	@Override
+	public void start(Stage stage) {
+		try {
 
->>>>>>> Stashed changes
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle("Mundial 2026");
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+			
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/administrador.fxml"));
+			//FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
 
-    public static void main(String[] args) {
-        // Probar conexión antes de lanzar la app
-        Conexion.getConexion();
-        launch(args);
-    }
+			Parent root = loader.load();
+			Scene scene = new Scene(root);
+			stage.setScene(scene);
+			stage.setTitle("Mundial 2026");
+			stage.show();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void main(String[] args) {
+		// Probar conexión antes de lanzar la app
+		Conexion.getConexion();
+		launch(args);
+	}
 }
