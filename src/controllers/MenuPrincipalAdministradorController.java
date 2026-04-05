@@ -10,12 +10,21 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import model.Usuario;
+import model.Bitacora;
+import emun.Rol;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+
 
 public class MenuPrincipalAdministradorController {
 
@@ -30,12 +39,19 @@ public class MenuPrincipalAdministradorController {
     @FXML private Button btnCerrarSesion;
 
     // Paneles
+    @FXML private StackPane contentPane;
     @FXML private AnchorPane inicioPane;
     @FXML private AnchorPane admUsuariosPane;
     @FXML private AnchorPane admBitacoraPane;
+    @FXML private AnchorPane admEquiposPane;
+    @FXML private AnchorPane admJugadoresPane;
+    @FXML private AnchorPane admPartidosPane;
+    @FXML private AnchorPane admConsultasPane;
+    @FXML private AnchorPane admReportesPane; 
 
     // Labels inicio
     @FXML private Text textUsuario;
+    @FXML private Text textUsuarioBienvenido;
     @FXML private Text textfecha;
     @FXML private Text textHora;
 
@@ -98,24 +114,44 @@ public class MenuPrincipalAdministradorController {
             colFechaIngresoAdmBitacora.setCellValueFactory(new PropertyValueFactory<>("fechaEntrada"));
             colFechaSalidaAdmBitacora.setCellValueFactory(new PropertyValueFactory<>("fechaSalida"));
         }
+
+        if (textUsuarioBienvenido != null)
+            textUsuarioBienvenido.setText(usernameActual != null ? usernameActual : "usuario");
+
+        if (contentPane != null && inicioPane != null)
+            cambiarVista(inicioPane);
     }
 
     // ========== NAVEGACIÓN ==========
     @FXML
     public void mostrarVentana(ActionEvent event) {
-        inicioPane.setVisible(false);
-        admUsuariosPane.setVisible(false);
-        admBitacoraPane.setVisible(false);
-
         if (event.getSource() == btnUsuario) {
-            admUsuariosPane.setVisible(true);
+            cambiarVista(admUsuariosPane);
             cargarUsuarios();
         } else if (event.getSource() == btnBitacora) {
-            admBitacoraPane.setVisible(true);
-        } else {
-            inicioPane.setVisible(true);
+            cambiarVista(admBitacoraPane);
+        } else if (event.getSource() == btnEquipos) {
+            cambiarVista(admEquiposPane);
+        } else if (event.getSource() == btnJugadores) {
+    cambiarVista(admJugadoresPane);
+} else if (event.getSource() == btnPartidos) {
+    cambiarVista(admPartidosPane);
+} else if (event.getSource() == btnConsultas) {
+    cambiarVista(admConsultasPane);
+} else if (event.getSource() == btnReportes) {
+    cambiarVista(admReportesPane);
+} else {
+            cambiarVista(inicioPane);
         }
     }
+private void cambiarVista(AnchorPane pane) {
+    AnchorPane[] todos = {inicioPane, admUsuariosPane, admBitacoraPane, admEquiposPane, admJugadoresPane};
+    for (AnchorPane p : todos) {
+        if (p != null) p.setVisible(false);
+    }
+    if (pane != null) pane.setVisible(true);
+}
+    
 
     // ========== CRUD USUARIOS ==========
     private void cargarUsuarios() {
