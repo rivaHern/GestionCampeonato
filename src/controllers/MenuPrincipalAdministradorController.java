@@ -67,12 +67,24 @@ public class MenuPrincipalAdministradorController {
     @FXML private TableColumn<Usuario, String> colRolAdmGU;
 
     // Bitácora
-    @FXML private DatePicker DateAdmBitacora;
     @FXML private TableView<Bitacora> tabAdmBitacora;
     @FXML private TableColumn<Bitacora, Integer> colIDAdmBitacora;
     @FXML private TableColumn<Bitacora, String> colUsuarioAdmBitacora;
     @FXML private TableColumn<Bitacora, String> colFechaIngresoAdmBitacora;
     @FXML private TableColumn<Bitacora, String> colFechaSalidaAdmBitacora;
+    @FXML private DatePicker DateAdmBitacora;
+
+    // Equipos - campos
+@FXML private TextField textAdmEquipoPais;
+@FXML private TextField textAdmEquipoDirectorTecnico;
+@FXML private ComboBox<String> comboAdmEquipoConfederacion;
+
+// Equipos - tabla
+@FXML private TableView<Equipo> tabAdmGE;
+@FXML private TableColumn<Equipo, Integer> colIDAdmGE;
+@FXML private TableColumn<Equipo, String> colEquiposAdmGE;
+@FXML private TableColumn<Equipo, String> colDirectorTecnicoAdmGE;
+@FXML private TableColumn<Equipo, String> colConfederacionAdmGE;
 
     // Usuario actual
     private static int idUsuarioActual;
@@ -117,7 +129,16 @@ public class MenuPrincipalAdministradorController {
 
         if (textUsuarioBienvenido != null)
             textUsuarioBienvenido.setText(usernameActual != null ? usernameActual : "usuario");
+if (colIDAdmGE != null) {
+    colIDAdmGE.setCellValueFactory(new PropertyValueFactory<>("id"));
+    colEquiposAdmGE.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+    colDirectorTecnicoAdmGE.setCellValueFactory(new PropertyValueFactory<>("director"));
+    colConfederacionAdmGE.setCellValueFactory(new PropertyValueFactory<>("confederacion"));
+    cargarEquipos();
+}
 
+if (comboAdmEquipoConfederacion != null)
+    comboAdmEquipoConfederacion.setItems(FXCollections.observableArrayList("UEFA", "CONMEBOL", "CONCACAF", "CAF", "AFC", "OFC"));
         if (contentPane != null && inicioPane != null)
             cambiarVista(inicioPane);
     }
@@ -323,10 +344,94 @@ private void cambiarVista(AnchorPane pane) {
     }
 
     // ========== MÉTODOS PENDIENTES ==========
-    @FXML void AdmEquiposAgregar(ActionEvent event) { System.out.println("pendiente - AdmEquiposAgregar"); }
-    @FXML void AdmEquiposActualizar(ActionEvent event) { System.out.println("pendiente - AdmEquiposActualizar"); }
-    @FXML void AdmEquiposBuscar(ActionEvent event) { System.out.println("pendiente - AdmEquiposBuscar"); }
-    @FXML void AdmEquiposEliminar(ActionEvent event) { System.out.println("pendiente - AdmEquiposEliminar"); }
+  // ========== CRUD EQUIPOS ==========
+private int idEquipoSeleccionado = -1;
+
+private void cargarEquipos() {
+    if (tabAdmGE == null) return;
+    ObservableList<Equipo> lista = FXCollections.observableArrayList();
+    try (Connection conn = Conexion.getConexion();
+         Statement st = conn.createStatement();
+         ResultSet rs = st.executeQuery(
+             "SELECT e.id_equipo, e.nombre, ISNULL(dt.nombre,'Sin DT') as director, c.siglas " +
+             "FROM Equipo e " +
+             "LEFT JOIN DirectorTecnico dt ON dt.id_equipo = e.id_equipo " +
+             "JOIN Confederacion c ON c.id_confederacion = e.id_confederacion")) {
+        while (rs.next()) {
+            lista.add(new Equipo(rs.getInt("id_equipo"), rs.getString("nombre"),
+                rs.getString("director"), rs.getString("siglas")));
+        }
+        tabAdmGE.setItems(lista);
+        tabAdmGE.setOnMouseClicked(e -> {
+            Equipo eq = tabAdmGE.getSelectionModel().getSelectedItem();
+            if (eq != null) {
+                idEquipoSeleccionado = eq.getId();
+                if (textAdmEquipoPais != null) textAdmEquipoPais.setText(eq.getNombre());
+                if (textAdmEquipoDirectorTecnico != null) textAdmEquipoDirectorTecnico.setText(eq.getDirector());
+                if (comboAdmEquipoConfederacion != null) comboAdmEquipoConfederacion.setValue(eq.getConfederacion());
+            }
+        });
+    } catch (Exception e) { mostrarAlerta("Error", e.getMessage()); }
+}
+
+@FXML void AdmEquiposAgregar(ActionEvent event) {
+    if (textAdmEquipoPais == null || comboAdmEquipoConfederacion == null) return;
+    String nombre = textAdmEquipoPais.getText().trim();
+    String conf = comboAdmEquipoConfederacion.getValue();
+    if (nombre.isEmpty() || conf == null) { mostrarAlerta("Error", "Complete todos los campos."); return; }
+    try (Connection conn = Conexion.getConexion();
+         PreparedStatement ps = conn.prepareStatement(
+             "INSERT INTO Equipo (nombre, id_confederacion, id_pais, valor_total) " +
+             "SELECT ?, id_confederacion, (SELECT TOP 1 id_pais FROM Pais WHERE nombre=?), 0 FROM Confederacion WHERE siglas=?")) {
+        ps.setString(1, nombre); ps.setString(2, nombre); ps.setString(3, conf);
+        ps.executeUpdate();
+        cargarEquipos();
+        mostrarInfo("Éxito", "Equipo agregado.");
+    } catch (Exception e) { mostrarAlerta("Error", e.getMessage()); }
+}
+
+@FXML void AdmEquiposActualizar(ActionEvent event) {
+    if (idEquipoSeleccionado == -1) { mostrarAlerta("Error", "Seleccione un equipo."); return; }
+    String nombre = textAdmEquipoPais.getText().trim();
+    String conf = comboAdmEquipoConfederacion.getValue();
+    try (Connection conn = Conexion.getConexion();
+         PreparedStatement ps = conn.prepareStatement(
+             "UPDATE Equipo SET nombre=?, id_confederacion=(SELECT id_confederacion FROM Confederacion WHERE siglas=?) WHERE id_equipo=?")) {
+        ps.setString(1, nombre); ps.setString(2, conf); ps.setInt(3, idEquipoSeleccionado);
+        ps.executeUpdate();
+        cargarEquipos();
+        mostrarInfo("Éxito", "Equipo actualizado.");
+    } catch (Exception e) { mostrarAlerta("Error", e.getMessage()); }
+}
+
+@FXML void AdmEquiposBuscar(ActionEvent event) {
+    if (textAdmEquipoPais == null) return;
+    String buscar = textAdmEquipoPais.getText().trim();
+    ObservableList<Equipo> lista = FXCollections.observableArrayList();
+    try (Connection conn = Conexion.getConexion();
+         PreparedStatement ps = conn.prepareStatement(
+             "SELECT e.id_equipo, e.nombre, ISNULL(dt.nombre,'Sin DT') as director, c.siglas " +
+             "FROM Equipo e LEFT JOIN DirectorTecnico dt ON dt.id_equipo=e.id_equipo " +
+             "JOIN Confederacion c ON c.id_confederacion=e.id_confederacion WHERE e.nombre LIKE ?")) {
+        ps.setString(1, "%" + buscar + "%");
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) lista.add(new Equipo(rs.getInt("id_equipo"), rs.getString("nombre"),
+            rs.getString("director"), rs.getString("siglas")));
+        tabAdmGE.setItems(lista);
+    } catch (Exception e) { mostrarAlerta("Error", e.getMessage()); }
+}
+
+@FXML void AdmEquiposEliminar(ActionEvent event) {
+    if (idEquipoSeleccionado == -1) { mostrarAlerta("Error", "Seleccione un equipo."); return; }
+    try (Connection conn = Conexion.getConexion();
+         PreparedStatement ps = conn.prepareStatement("DELETE FROM Equipo WHERE id_equipo=?")) {
+        ps.setInt(1, idEquipoSeleccionado);
+        ps.executeUpdate();
+        idEquipoSeleccionado = -1;
+        cargarEquipos();
+        mostrarInfo("Éxito", "Equipo eliminado.");
+    } catch (Exception e) { mostrarAlerta("Error", e.getMessage()); }
+}
 
     // ========== CERRAR SESIÓN ==========
     @FXML
@@ -386,4 +491,16 @@ private void cambiarVista(AnchorPane pane) {
         public String getFechaEntrada() { return fechaEntrada; }
         public String getFechaSalida() { return fechaSalida; }
     }
+    // ========== CLASE MODELO EQUIPO ==========
+public static class Equipo {
+    private int id;
+    private String nombre, director, confederacion;
+    public Equipo(int id, String nombre, String director, String confederacion) {
+        this.id = id; this.nombre = nombre; this.director = director; this.confederacion = confederacion;
+    }
+    public int getId() { return id; }
+    public String getNombre() { return nombre; }
+    public String getDirector() { return director; }
+    public String getConfederacion() { return confederacion; }
+}
 }

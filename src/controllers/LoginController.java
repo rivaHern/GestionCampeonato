@@ -49,7 +49,7 @@ public class LoginController {
 				String nombreVista = "";
 
 				if (rol == Rol.ADMINISTRADOR) {
-					nombreVista = "/views/Administrador.fxml";
+					nombreVista = "/views/menuPrincipalAdministrador.fxml";
 				} else if (rol == Rol.TRADICIONAL) {
 					nombreVista = "/views/Tradicional.fxml";
 				} else if (rol == Rol.ESPORADICO) {
@@ -63,7 +63,7 @@ public class LoginController {
 				psBitacora.executeUpdate();
 
 				// Pasar datos del usuario al menú
-				//AdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"));
+				MenuPrincipalAdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"));
 
 				// Abrir menú según rol
 				FXMLLoader loader = new FXMLLoader(getClass().getResource(nombreVista));
