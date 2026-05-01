@@ -49,7 +49,7 @@ public class LoginController {
 				String nombreVista = "";
 
 				if (rol == Rol.ADMINISTRADOR) {
-					nombreVista = "/views/menuPrincipalAdministrador.fxml";
+					nombreVista = "/views/Administrador.fxml";
 				} else if (rol == Rol.TRADICIONAL) {
 					nombreVista = "/views/Tradicional.fxml";
 				} else if (rol == Rol.ESPORADICO) {
@@ -64,6 +64,7 @@ public class LoginController {
 
 				// Pasar datos del usuario al menú
 				MenuPrincipalAdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"));
+                                        controllers.AdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"));
 
 				// Abrir menú según rol
 				FXMLLoader loader = new FXMLLoader(getClass().getResource(nombreVista));
