@@ -87,18 +87,6 @@
 									</graphic>
 								</Button>
 
-								<!-- FILA 9: Botón Reportes -->
-								<Button fx:id="btnReportes" onAction="#mostrarVentana"
-									prefHeight="45.0" prefWidth="180.0" styleClass="menu-button"
-									text="Reportes" GridPane.rowIndex="3">
-									<graphic>
-										<ImageView fitHeight="26" preserveRatio="true">
-											<image>
-												<Image url="@icon/reportes.png" />
-											</image>
-										</ImageView>
-									</graphic>
-								</Button>
 							</children>
 						</GridPane>
 						<Button fx:id="btnCerrarSesion" layoutX="4.0"

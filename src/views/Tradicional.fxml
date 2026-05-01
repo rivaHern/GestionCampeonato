@@ -964,6 +964,25 @@
 							</children>
 						</AnchorPane>
 					</children>
+					<AnchorPane fx:id="reportesPane" prefHeight="605.0" prefWidth="670.0" visible="false">
+						<fx:define>
+							<ToggleGroup fx:id="tgReportes" />
+						</fx:define>
+						<children>
+							<Text layoutX="184.0" layoutY="37.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="section-title" text="REPORTES DEL MUNDIAL" wrappingWidth="312.0" />
+							<Text layoutX="50.0" layoutY="85.0" styleClass="form-label" text="Seleccione el reporte a generar:" />
+							<RadioButton fx:id="rdoReporte1" layoutX="50.0" layoutY="115.0" text="1. Usuarios que ingresaron/salieron en una fecha." toggleGroup="$tgReportes" />
+							<RadioButton fx:id="rdoReporte2" layoutX="50.0" layoutY="150.0" text="2. Jugadores por peso, estatura y equipo." toggleGroup="$tgReportes" />
+							<RadioButton fx:id="rdoReporte3" layoutX="50.0" layoutY="185.0" text="3. Valor total de jugadores por equipo y confederacion." toggleGroup="$tgReportes" />
+							<RadioButton fx:id="rdoReporte4" layoutX="50.0" layoutY="220.0" text="4. Paises que juegan en cada pais anfitrion." toggleGroup="$tgReportes" />
+							<DatePicker fx:id="dateReporte" layoutX="50.0" layoutY="265.0" prefHeight="32.0" prefWidth="200.0" promptText="Fecha reporte 1" />
+							<TextField fx:id="textPesoReporte" layoutX="270.0" layoutY="265.0" prefHeight="32.0" prefWidth="120.0" promptText="Peso max" styleClass="text-field" />
+							<TextField fx:id="textEstaturaReporte" layoutX="410.0" layoutY="265.0" prefHeight="32.0" prefWidth="120.0" promptText="Estatura max" styleClass="text-field" />
+							<ComboBox fx:id="comboEquipoReporte" layoutX="50.0" layoutY="310.0" prefHeight="32.0" prefWidth="200.0" promptText="Equipo" />
+							<ComboBox fx:id="comboConfederacionReporte" layoutX="270.0" layoutY="310.0" prefHeight="32.0" prefWidth="200.0" promptText="Confederacion" />
+							<Button layoutX="50.0" layoutY="360.0" mnemonicParsing="false" onAction="#generarReporte" prefHeight="40.0" prefWidth="200.0" styleClass="action-button, add" text="Generar PDF" />
+						</children>
+					</AnchorPane>
 				</AnchorPane>
 			</center>
 		</BorderPane>

@@ -1,6 +1,17 @@
 package controllers;
 
 import application.Conexion;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.Phrase;
+import java.io.FileOutputStream;
+import java.io.File;
+import javafx.stage.FileChooser;
 import model.Bitacora;
 import model.Usuario;
 import model.Jugador;
@@ -253,6 +264,19 @@ public class AdministradorController {
 	@FXML
 	private PasswordField textContrasenia;
 
+	// Reportes
+	@FXML private RadioButton rdoReporte1;
+	@FXML private RadioButton rdoReporte2;
+	@FXML private RadioButton rdoReporte3;
+	@FXML private RadioButton rdoReporte4;
+	@FXML private ToggleGroup tgReportes;
+	@FXML private DatePicker dateReporte;
+	@FXML private TextField textPesoReporte;
+	@FXML private TextField textEstaturaReporte;
+	@FXML private ComboBox<String> comboEquipoReporte;
+	@FXML private ComboBox<String> comboConfederacionReporte;
+	@FXML private AnchorPane reportesPane;
+
 	// Labels de inicio
 	@FXML
 	private Text textfecha;
@@ -370,7 +394,10 @@ public class AdministradorController {
 			showPane(partidosPane);
 			cargarCombosPartidos();
 			cargarPartidos();
-		} else if (event.getSource() == btnConsultas) {
+		} else if (event.getSource() == btnReportes) {
+			showPane(reportesPane);
+			cargarCombosReportes();
+} else if (event.getSource() == btnConsultas) {
 			showPane(consultasPane);
 			if (combSeleccioneEstadio != null) {
 				ObservableList<String> estadios = FXCollections.observableArrayList();
@@ -407,6 +434,9 @@ public class AdministradorController {
 		}
 		if (consultasPane != null) {
 			consultasPane.setVisible(false);
+		}
+		if (reportesPane != null) {
+			reportesPane.setVisible(false);
 		}
 		if (pane != null) {
 			pane.setVisible(true);
@@ -1232,7 +1262,192 @@ public class AdministradorController {
 		}
 	}
 
-	// ========== CERRAR SESIÓN ==========
+	// ========== REPORTES PDF ==========
+
+	private void cargarCombosReportes() {
+		try (Connection conn = Conexion.getConexion()) {
+			ObservableList<String> equipos = FXCollections.observableArrayList();
+			try (PreparedStatement ps = conn.prepareStatement("SELECT nombre FROM Equipo ORDER BY nombre");
+			     ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) equipos.add(rs.getString("nombre"));
+			}
+			if (comboEquipoReporte != null) comboEquipoReporte.setItems(equipos);
+
+			ObservableList<String> confs = FXCollections.observableArrayList();
+			try (PreparedStatement ps = conn.prepareStatement("SELECT nombre FROM Confederacion ORDER BY nombre");
+			     ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) confs.add(rs.getString("nombre"));
+			}
+			if (comboConfederacionReporte != null) comboConfederacionReporte.setItems(confs);
+		} catch (Exception e) { e.printStackTrace(); }
+	}
+
+	@FXML
+	void generarReporte(ActionEvent event) {
+		if (tgReportes == null || tgReportes.getSelectedToggle() == null) {
+			mostrarAlerta("Error", "Seleccione un reporte.");
+			return;
+		}
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Guardar Reporte PDF");
+		fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+		fc.setInitialFileName("reporte.pdf");
+		File archivo = fc.showSaveDialog(btnReportes.getScene().getWindow());
+		if (archivo == null) return;
+
+		try {
+			RadioButton sel = (RadioButton) tgReportes.getSelectedToggle();
+			if (sel == rdoReporte1) generarReporte1(archivo);
+			else if (sel == rdoReporte2) generarReporte2(archivo);
+			else if (sel == rdoReporte3) generarReporte3(archivo);
+			else if (sel == rdoReporte4) generarReporte4(archivo);
+		} catch (Exception e) {
+			mostrarAlerta("Error", "Error generando PDF: " + e.getMessage());
+		}
+	}
+
+	private void generarReporte1(File archivo) throws Exception {
+		if (dateReporte.getValue() == null) { mostrarAlerta("Error", "Seleccione una fecha."); return; }
+		Document doc = new Document();
+		PdfWriter.getInstance(doc, new FileOutputStream(archivo));
+		doc.open();
+		doc.add(new Paragraph("REPORTE DE BITACORA - " + dateReporte.getValue(), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+		doc.add(new Paragraph(" "));
+		PdfPTable tabla = new PdfPTable(4);
+		tabla.setWidthPercentage(100);
+		for (String h : new String[]{"ID", "Usuario", "Entrada", "Salida"}) {
+			PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+			cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+			tabla.addCell(cell);
+		}
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(
+			"SELECT b.id_bitacora, u.username, b.fecha_entrada, b.fecha_salida "
+			+ "FROM Bitacora b JOIN Usuario u ON b.id_usuario = u.id_usuario "
+			+ "WHERE CAST(b.fecha_entrada AS DATE) = ?")) {
+			ps.setDate(1, java.sql.Date.valueOf(dateReporte.getValue()));
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					tabla.addCell(String.valueOf(rs.getInt("id_bitacora")));
+					tabla.addCell(rs.getString("username"));
+					tabla.addCell(rs.getString("fecha_entrada"));
+					String salida = rs.getString("fecha_salida");
+					tabla.addCell(salida != null ? salida : "En sesion");
+				}
+			}
+		}
+		doc.add(tabla);
+		doc.close();
+		mostrarInfo("Exito", "Reporte guardado en: " + archivo.getPath());
+	}
+
+	private void generarReporte2(File archivo) throws Exception {
+		Document doc = new Document();
+		PdfWriter.getInstance(doc, new FileOutputStream(archivo));
+		doc.open();
+		doc.add(new Paragraph("REPORTE DE JUGADORES", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+		doc.add(new Paragraph(" "));
+		PdfPTable tabla = new PdfPTable(6);
+		tabla.setWidthPercentage(100);
+		for (String h : new String[]{"Nombre", "Apellido", "Peso", "Estatura", "Valor", "Equipo"}) {
+			PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+			cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+			tabla.addCell(cell);
+		}
+		String sql = "SELECT j.nombre, j.apellido, j.peso, j.estatura, j.valor, e.nombre as equipo "
+			+ "FROM Jugador j JOIN Equipo e ON j.id_equipo = e.id_equipo WHERE 1=1";
+		if (!textPesoReporte.getText().trim().isEmpty())
+			sql += " AND j.peso <= " + textPesoReporte.getText().trim();
+		if (!textEstaturaReporte.getText().trim().isEmpty())
+			sql += " AND j.estatura <= " + textEstaturaReporte.getText().trim();
+		if (comboEquipoReporte.getValue() != null)
+			sql += " AND e.nombre = '" + comboEquipoReporte.getValue() + "'";
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(sql);
+		     ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				tabla.addCell(rs.getString("nombre"));
+				tabla.addCell(rs.getString("apellido"));
+				tabla.addCell(rs.getString("peso"));
+				tabla.addCell(rs.getString("estatura"));
+				tabla.addCell(rs.getString("valor"));
+				tabla.addCell(rs.getString("equipo"));
+			}
+		}
+		doc.add(tabla);
+		doc.close();
+		mostrarInfo("Exito", "Reporte guardado en: " + archivo.getPath());
+	}
+
+	private void generarReporte3(File archivo) throws Exception {
+		Document doc = new Document();
+		PdfWriter.getInstance(doc, new FileOutputStream(archivo));
+		doc.open();
+		doc.add(new Paragraph("REPORTE VALOR TOTAL POR EQUIPO Y CONFEDERACION", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+		doc.add(new Paragraph(" "));
+		PdfPTable tabla = new PdfPTable(3);
+		tabla.setWidthPercentage(100);
+		for (String h : new String[]{"Confederacion", "Equipo", "Valor Total"}) {
+			PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+			cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+			tabla.addCell(cell);
+		}
+		String sql = "SELECT c.nombre as confederacion, e.nombre as equipo, SUM(j.valor) as total "
+			+ "FROM Jugador j JOIN Equipo e ON j.id_equipo = e.id_equipo "
+			+ "JOIN Confederacion c ON e.id_confederacion = c.id_confederacion "
+			+ (comboConfederacionReporte.getValue() != null ? "WHERE c.nombre = '" + comboConfederacionReporte.getValue() + "' " : "")
+			+ "GROUP BY c.nombre, e.nombre ORDER BY c.nombre, total DESC";
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(sql);
+		     ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				tabla.addCell(rs.getString("confederacion"));
+				tabla.addCell(rs.getString("equipo"));
+				tabla.addCell(rs.getString("total"));
+			}
+		}
+		doc.add(tabla);
+		doc.close();
+		mostrarInfo("Exito", "Reporte guardado en: " + archivo.getPath());
+	}
+
+	private void generarReporte4(File archivo) throws Exception {
+		Document doc = new Document();
+		PdfWriter.getInstance(doc, new FileOutputStream(archivo));
+		doc.open();
+		doc.add(new Paragraph("REPORTE PAISES POR SEDE ANFITRIONA", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+		doc.add(new Paragraph(" "));
+		PdfPTable tabla = new PdfPTable(3);
+		tabla.setWidthPercentage(100);
+		for (String h : new String[]{"Pais Anfitrion", "Equipo Local", "Equipo Visitante"}) {
+			PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+			cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+			tabla.addCell(cell);
+		}
+		String sql = "SELECT p.nombre as pais, el.nombre as local, ev.nombre as visitante "
+			+ "FROM Partido pt "
+			+ "JOIN Estadio est ON pt.id_estadio = est.id_estadio "
+			+ "JOIN Ciudad c ON est.id_ciudad = c.id_ciudad "
+			+ "JOIN Pais p ON c.id_pais = p.id_pais "
+			+ "JOIN Equipo el ON pt.id_equipo_local = el.id_equipo "
+			+ "JOIN Equipo ev ON pt.id_equipo_visitante = ev.id_equipo "
+			+ "WHERE p.nombre IN ('Mexico', 'Estados Unidos', 'Canada') "
+			+ "ORDER BY p.nombre";
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(sql);
+		     ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				tabla.addCell(rs.getString("pais"));
+				tabla.addCell(rs.getString("local"));
+				tabla.addCell(rs.getString("visitante"));
+			}
+		}
+		doc.add(tabla);
+		doc.close();
+		mostrarInfo("Exito", "Reporte guardado en: " + archivo.getPath());
+	}
+
+	// ========== CERRAR SESION ==========
 	@FXML
 	void cerrarSesion(ActionEvent event) {
 		try {

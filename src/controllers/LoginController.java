@@ -49,9 +49,9 @@ public class LoginController {
 				String nombreVista = "";
 
 				if (rol == Rol.ADMINISTRADOR) {
-					nombreVista = "/views/Administrador.fxml";
-				} else if (rol == Rol.TRADICIONAL) {
 					nombreVista = "/views/Tradicional.fxml";
+				} else if (rol == Rol.TRADICIONAL) {
+					nombreVista = "/views/Administrador.fxml";
 				} else if (rol == Rol.ESPORADICO) {
 					nombreVista = "/views/Esporadico.fxml";
 				}
