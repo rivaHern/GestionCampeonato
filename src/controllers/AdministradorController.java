@@ -264,6 +264,14 @@ public class AdministradorController {
 	@FXML
 	private PasswordField textContrasenia;
 
+	// Parametros consultas
+	@FXML private ComboBox<String> comboConfederacionConsulta;
+	@FXML private ComboBox<String> comboEstadioConsulta;
+	@FXML private ComboBox<String> comboPaisConsulta;
+	@FXML private TextField textEdadConsulta;
+
+	// Parametros consultas
+
 	// Reportes
 	@FXML private RadioButton rdoReporte1;
 	@FXML private RadioButton rdoReporte2;
@@ -278,6 +286,7 @@ public class AdministradorController {
 	@FXML private AnchorPane reportesPane;
 
 	// Labels de inicio
+	@FXML private Text textNombreUsuario;
 	@FXML
 	private Text textfecha;
 	@FXML
@@ -289,16 +298,19 @@ public class AdministradorController {
 
 	public static int staticIdUsuario = 0;
 	public static String staticUsername = "";
+	public static Rol staticRol = null;
 
-	public static void setUsuarioActual(int id, String username) {
+	public static void setUsuarioActual(int id, String username, Rol rol) {
 		staticIdUsuario = id;
 		staticUsername = username;
+		staticRol = rol;
 	}
 
 	@FXML
 	void initialize_session() {
 		idUsuarioActual = staticIdUsuario;
 		usernameActual = staticUsername;
+		if (textNombreUsuario != null) textNombreUsuario.setText(usernameActual);
 	}
 	private int idUsuarioSeleccionado = -1;
 
@@ -312,7 +324,20 @@ public class AdministradorController {
 		initJugadoresTable();
 		initPartidosTable();
 		initialize_session();
+		if (tgConsultas != null) {
+			tgConsultas.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+				if (newVal != null) actualizarParametrosConsulta();
+			});
+		}
 		showPane(inicioPane);
+
+		// Ocultar paneles de admin si no es ADMINISTRADOR
+		if (staticRol != Rol.ADMINISTRADOR) {
+			if (usuariosPane != null) usuariosPane.setVisible(false);
+			if (bitacoraPane != null) bitacoraPane.setVisible(false);
+			if (btnUsuario != null) btnUsuario.setVisible(false);
+			if (btnBitacora != null) btnBitacora.setVisible(false);
+		}
 	}
 
 	private void initDateTime() {
@@ -397,8 +422,11 @@ public class AdministradorController {
 		} else if (event.getSource() == btnReportes) {
 			showPane(reportesPane);
 			cargarCombosReportes();
+			inicializarCamposReportes();
 } else if (event.getSource() == btnConsultas) {
 			showPane(consultasPane);
+			if (combSeleccioneEstadio != null) combSeleccioneEstadio.setVisible(false);
+			if (textParametroBusqueda != null) textParametroBusqueda.setVisible(false);
 			if (combSeleccioneEstadio != null) {
 				ObservableList<String> estadios = FXCollections.observableArrayList();
 				try (Connection conn = Conexion.getConexion();
@@ -1189,6 +1217,8 @@ public class AdministradorController {
 
 	@SuppressWarnings("unchecked")
 	private void consultaJugadorMasCostosoPorConfederacion() {
+		String filtroConf = textParametroBusqueda != null && !textParametroBusqueda.getText().trim().isEmpty()
+			? textParametroBusqueda.getText().trim() : null;
 		ObservableList<javafx.beans.property.SimpleStringProperty[]> lista = FXCollections.observableArrayList();
 		String sql = "SELECT c.nombre as confederacion, j.nombre + ' ' + j.apellido as jugador, MAX(j.valor) as valor "
 			+ "FROM Jugador j "
@@ -1213,21 +1243,31 @@ public class AdministradorController {
 	}
 
 	private void consultaEquipoMasCostosoPorPaisAnfitrion() {
+		String filtroPais = textParametroBusqueda != null && !textParametroBusqueda.getText().trim().isEmpty()
+			? textParametroBusqueda.getText().trim() : null;
+		String wherePais = filtroPais != null
+			? "WHERE p.nombre = '" + filtroPais + "' "
+			: "WHERE p.nombre IN ('México', 'Estados Unidos', 'Canadá') ";
 		String sql = "SELECT p.nombre as pais, e.nombre as equipo, SUM(j.valor) as valor_total "
 			+ "FROM Jugador j "
 			+ "JOIN Equipo e ON j.id_equipo = e.id_equipo "
 			+ "JOIN Pais p ON e.id_pais = p.id_pais "
-			+ "WHERE p.nombre IN ('México', 'Estados Unidos', 'Canadá') "
+			+ wherePais
 			+ "GROUP BY p.nombre, e.nombre "
 			+ "ORDER BY p.nombre, valor_total DESC";
 		ejecutarConsultaGenerica(sql, new String[]{"País", "Equipo", "Valor Total"});
 	}
 
 	private void consultaJugadoresMenores21() {
+		int edad = 21;
+		try {
+			if (textParametroBusqueda != null && !textParametroBusqueda.getText().trim().isEmpty())
+				edad = Integer.parseInt(textParametroBusqueda.getText().trim());
+		} catch (NumberFormatException e) { edad = 21; }
 		String sql = "SELECT e.nombre as equipo, COUNT(j.id_jugador) as cantidad "
 			+ "FROM Jugador j "
 			+ "JOIN Equipo e ON j.id_equipo = e.id_equipo "
-			+ "WHERE DATEDIFF(YEAR, j.fecha_nacimiento, GETDATE()) < 21 "
+			+ "WHERE DATEDIFF(YEAR, j.fecha_nacimiento, GETDATE()) < " + edad + " "
 			+ "GROUP BY e.nombre "
 			+ "ORDER BY cantidad DESC";
 		ejecutarConsultaGenerica(sql, new String[]{"Equipo", "Jugadores < 21 años"});
@@ -1264,6 +1304,50 @@ public class AdministradorController {
 
 	// ========== REPORTES PDF ==========
 
+	private void inicializarCamposReportes() {
+		if (dateReporte != null) dateReporte.setVisible(false);
+		if (textPesoReporte != null) textPesoReporte.setVisible(false);
+		if (textEstaturaReporte != null) textEstaturaReporte.setVisible(false);
+		if (comboEquipoReporte != null) comboEquipoReporte.setVisible(false);
+		if (comboConfederacionReporte != null) comboConfederacionReporte.setVisible(false);
+		// Agregar listener a los radio buttons
+		if (tgReportes != null) {
+			tgReportes.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+				if (newVal != null) onReporteSeleccionado(null);
+			});
+		}
+	}
+
+	private void actualizarParametrosConsulta() {
+		// Ocultar todos
+		if (combSeleccioneEstadio != null) combSeleccioneEstadio.setVisible(false);
+		if (textParametroBusqueda != null) textParametroBusqueda.setVisible(false);
+
+		RadioButton sel = (RadioButton) tgConsultas.getSelectedToggle();
+		if (sel == rdoConsulta1) {
+			// Confederacion — usar textParametroBusqueda como campo
+			if (textParametroBusqueda != null) {
+				textParametroBusqueda.setVisible(true);
+				textParametroBusqueda.setPromptText("Confederación (UEFA, CONMEBOL...)");
+			}
+		} else if (sel == rdoConsulta2) {
+			if (combSeleccioneEstadio != null) combSeleccioneEstadio.setVisible(true);
+		} else if (sel == rdoConsulta3) {
+			// País anfitrión — usar textParametroBusqueda
+			if (textParametroBusqueda != null) {
+				textParametroBusqueda.setVisible(true);
+				textParametroBusqueda.setPromptText("País: México, Estados Unidos o Canadá");
+			}
+		} else if (sel == rdoConsulta4) {
+			// Edad
+			if (textParametroBusqueda != null) {
+				textParametroBusqueda.setVisible(true);
+				textParametroBusqueda.setPromptText("Edad máxima (ej: 21)");
+			}
+		}
+	}
+
+
 	private void cargarCombosReportes() {
 		try (Connection conn = Conexion.getConexion()) {
 			ObservableList<String> equipos = FXCollections.observableArrayList();
@@ -1283,15 +1367,44 @@ public class AdministradorController {
 	}
 
 	@FXML
+	void onReporteSeleccionado(ActionEvent event) {
+		if (dateReporte != null) dateReporte.setVisible(false);
+		if (textPesoReporte != null) textPesoReporte.setVisible(false);
+		if (textEstaturaReporte != null) textEstaturaReporte.setVisible(false);
+		if (comboEquipoReporte != null) comboEquipoReporte.setVisible(false);
+		if (comboConfederacionReporte != null) comboConfederacionReporte.setVisible(false);
+
+		RadioButton sel = (RadioButton) tgReportes.getSelectedToggle();
+		if (sel == rdoReporte1) {
+			if (dateReporte != null) dateReporte.setVisible(true);
+		} else if (sel == rdoReporte2) {
+			if (textPesoReporte != null) textPesoReporte.setVisible(true);
+			if (textEstaturaReporte != null) textEstaturaReporte.setVisible(true);
+			if (comboEquipoReporte != null) comboEquipoReporte.setVisible(true);
+		} else if (sel == rdoReporte3) {
+			if (comboConfederacionReporte != null) comboConfederacionReporte.setVisible(true);
+			if (comboEquipoReporte != null) comboEquipoReporte.setVisible(true);
+		}
+		// Reporte 4 no necesita parámetros
+	}
+
+	@FXML
 	void generarReporte(ActionEvent event) {
 		if (tgReportes == null || tgReportes.getSelectedToggle() == null) {
 			mostrarAlerta("Error", "Seleccione un reporte.");
 			return;
 		}
+		RadioButton selNombre = (RadioButton) tgReportes.getSelectedToggle();
+		String nombreArchivo = "reporte.pdf";
+		if (selNombre == rdoReporte1) nombreArchivo = "reporte_bitacora.pdf";
+		else if (selNombre == rdoReporte2) nombreArchivo = "reporte_jugadores.pdf";
+		else if (selNombre == rdoReporte3) nombreArchivo = "reporte_valor_equipos.pdf";
+		else if (selNombre == rdoReporte4) nombreArchivo = "reporte_paises_anfitrion.pdf";
+
 		FileChooser fc = new FileChooser();
 		fc.setTitle("Guardar Reporte PDF");
 		fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-		fc.setInitialFileName("reporte.pdf");
+		fc.setInitialFileName(generarNombreUnico(nombreArchivo));
 		File archivo = fc.showSaveDialog(btnReportes.getScene().getWindow());
 		if (archivo == null) return;
 
@@ -1392,10 +1505,15 @@ public class AdministradorController {
 			cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
 			tabla.addCell(cell);
 		}
+		String whereClause = "";
+		if (comboConfederacionReporte.getValue() != null)
+			whereClause += "WHERE c.nombre = '" + comboConfederacionReporte.getValue() + "' ";
+		if (comboEquipoReporte.getValue() != null)
+			whereClause += (whereClause.isEmpty() ? "WHERE " : "AND ") + "e.nombre = '" + comboEquipoReporte.getValue() + "' ";
 		String sql = "SELECT c.nombre as confederacion, e.nombre as equipo, SUM(j.valor) as total "
 			+ "FROM Jugador j JOIN Equipo e ON j.id_equipo = e.id_equipo "
 			+ "JOIN Confederacion c ON e.id_confederacion = c.id_confederacion "
-			+ (comboConfederacionReporte.getValue() != null ? "WHERE c.nombre = '" + comboConfederacionReporte.getValue() + "' " : "")
+			+ whereClause
 			+ "GROUP BY c.nombre, e.nombre ORDER BY c.nombre, total DESC";
 		try (Connection conn = Conexion.getConexion();
 		     PreparedStatement ps = conn.prepareStatement(sql);
@@ -1486,4 +1604,16 @@ public class AdministradorController {
 		alert.showAndWait();
 	}
 
+
+    private String generarNombreUnico(String nombreBase) {
+        File carpeta = new File(System.getProperty("user.home"), "Downloads");
+        String nombre = nombreBase.replace(".pdf", "");
+        File archivo = new File(carpeta, nombreBase);
+        int i = 1;
+        while (archivo.exists()) {
+            archivo = new File(carpeta, nombre + "_" + i + ".pdf");
+            i++;
+        }
+        return archivo.getName();
+    }
 }

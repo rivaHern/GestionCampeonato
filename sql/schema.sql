@@ -131,5 +131,6 @@ GO
 
 INSERT INTO Usuario (username, password, rol, activo) VALUES
 ('admin', 'Admin123!', 'ADMINISTRADOR', 1),
-('valen', '123', 'TRADICIONAL', 1);
+('valen', '123', 'TRADICIONAL', 1),
+('esporadico', 'esporadico', 'ESPORADICO', 1);
 GO

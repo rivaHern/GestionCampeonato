@@ -11,10 +11,13 @@ cd "$PROJECT_DIR"
 # Detectar JavaFX automáticamente
 find_javafx() {
     for path in \
+        "$PROJECT_DIR/javafx-sdk-21.0.5/lib" \
+        "$HOME/javafx-sdk-21.0.5/lib" \
         "$HOME/javafx-sdk-17.0.13/lib" \
         "$HOME/javafx-sdk-17/lib" \
         "/usr/lib/jvm/openjfx" \
         "/usr/share/openjfx/lib" \
+        "/opt/javafx-sdk-21/lib" \
         "/opt/javafx-sdk-17/lib" \
         "/opt/javafx-sdk/lib"; do
         if [ -f "$path/javafx.controls.jar" ]; then

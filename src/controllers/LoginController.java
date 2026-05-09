@@ -49,11 +49,11 @@ public class LoginController {
 				String nombreVista = "";
 
 				if (rol == Rol.ADMINISTRADOR) {
-					nombreVista = "/views/Tradicional.fxml";
-				} else if (rol == Rol.TRADICIONAL) {
-					nombreVista = "/views/Administrador.fxml";
-				} else if (rol == Rol.ESPORADICO) {
-					nombreVista = "/views/Esporadico.fxml";
+    nombreVista = "/views/Administrador.fxml";
+} else if (rol == Rol.TRADICIONAL) {
+    nombreVista = "/views/Tradicional.fxml";
+} else if (rol == Rol.ESPORADICO) {
+    nombreVista = "/views/Esporadico.fxml";
 				}
 
 				// Registrar entrada en bitácora
@@ -64,7 +64,7 @@ public class LoginController {
 
 				// Pasar datos del usuario al menú
 				MenuPrincipalAdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"));
-                                        controllers.AdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"));
+                                        controllers.AdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"), rol);
 
 				// Abrir menú según rol
 				FXMLLoader loader = new FXMLLoader(getClass().getResource(nombreVista));

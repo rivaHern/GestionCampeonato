@@ -14,6 +14,11 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.text.Text?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -26,18 +31,18 @@
 
 <!-- Pantalla principal del Mundial 2026 -->
 
-<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="800.0"
+<AnchorPane fx:id="root" prefHeight="650.0" prefWidth="800.0"
 	styleClass="root-pane"
 	stylesheets="@styles/menuPrincipalAdministrador.css"
 	xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="controllers.MenuPrincipalAdministradorController">
 	<children>
-		<BorderPane prefHeight="600.0" prefWidth="800.0"
+		<BorderPane prefHeight="650.0" prefWidth="800.0"
 			stylesheets="@styles/menuPrincipalAdministrador.css">
 
 			<!-- ========== MENÚ LATERAL IZQUIERDO ========== -->
 			<left>
-				<AnchorPane prefHeight="600.0" prefWidth="180.0"
+				<AnchorPane prefHeight="650.0" prefWidth="180.0"
 					styleClass="sidebar" BorderPane.alignment="CENTER">
 					<children>
 						<!-- GridPane que organiza todas las filas del menú -->
@@ -179,7 +184,7 @@
 									<children>
 										<Separator layoutY="5" prefWidth="180" />
 										<Button fx:id="btnCerrarSesion" layoutY="15.0"
-											onAction="#CerrarSesion" prefHeight="45.0" prefWidth="180.0"
+											onAction="#cerrarSesion" prefHeight="45.0" prefWidth="180.0"
 											styleClass="logout-button"
 											stylesheets="@styles/menuPrincipalAdministrador.css"
 											text="Cerrar Sesión">
@@ -271,7 +276,7 @@
 											<children>
 												<Text strokeType="OUTSIDE" strokeWidth="0.0"
 													text="Usuario:" />
-												<Text fx:id="textUsuario" strokeType="OUTSIDE"
+												<Text fx:id="textUsuarioInfo" strokeType="OUTSIDE"
 													strokeWidth="0.0" text="usuario" GridPane.columnIndex="1" />
 												<Text strokeType="OUTSIDE" strokeWidth="0.0"
 													text="Fecha:" GridPane.columnIndex="2" />
@@ -596,6 +601,39 @@
 								<AnchorPane prefHeight="606.0" prefWidth="665.0" />
 							</children>
 						</AnchorPane>
+					<AnchorPane fx:id="consultasPane" prefHeight="606.0" prefWidth="663.0" visible="false">
+						<fx:define><ToggleGroup fx:id="tgConsultas" /></fx:define>
+						<children>
+							<Text layoutX="184.0" layoutY="37.0" styleClass="section-title" strokeType="OUTSIDE" strokeWidth="0.0" text="CONSULTAS DEL MUNDIAL" wrappingWidth="312.0" />
+							<Text layoutX="50.0" layoutY="85.0" styleClass="form-label" text="Seleccione la consulta a ejecutar:" />
+							<RadioButton fx:id="rdoConsulta1" layoutX="50.0" layoutY="115.0" text="1. Jugador mas costoso por confederacion." toggleGroup="$tgConsultas" />
+							<RadioButton fx:id="rdoConsulta2" layoutX="50.0" layoutY="150.0" text="2. Partidos en un estadio especifico." toggleGroup="$tgConsultas" />
+							<RadioButton fx:id="rdoConsulta3" layoutX="50.0" layoutY="185.0" text="3. Equipo mas costoso por pais anfitrion." toggleGroup="$tgConsultas" />
+							<RadioButton fx:id="rdoConsulta4" layoutX="50.0" layoutY="220.0" text="4. Cantidad de jugadores menores de X anos por equipo." toggleGroup="$tgConsultas" />
+							<TextField fx:id="textParametroBusqueda" layoutX="50.0" layoutY="265.0" prefHeight="32.0" prefWidth="300.0" promptText="Parametro" styleClass="text-field" visible="false" />
+							<ComboBox fx:id="combSeleccioneEstadio" layoutX="370.0" layoutY="265.0" prefHeight="32.0" prefWidth="200.0" promptText="Estadio" visible="false" />
+							<Button layoutX="50.0" layoutY="315.0" mnemonicParsing="false" onAction="#ejecutarConsultas" prefHeight="40.0" prefWidth="150.0" styleClass="action-button, add" text="Ejecutar" />
+							<Text layoutX="50.0" layoutY="376.0" styleClass="form-label" strokeType="OUTSIDE" strokeWidth="0.0" text="Resultados" />
+							<TableView fx:id="tabConsultas" layoutX="33.0" layoutY="383.0" prefHeight="210.0" prefWidth="609.0" styleClass="table-view" />
+						</children>
+					</AnchorPane>
+					<AnchorPane fx:id="reportesPane" prefHeight="606.0" prefWidth="663.0" visible="false">
+						<fx:define><ToggleGroup fx:id="tgReportes" /></fx:define>
+						<children>
+							<Text layoutX="184.0" layoutY="37.0" styleClass="section-title" strokeType="OUTSIDE" strokeWidth="0.0" text="REPORTES DEL MUNDIAL" wrappingWidth="312.0" />
+							<Text layoutX="50.0" layoutY="85.0" styleClass="form-label" text="Seleccione el reporte a generar:" />
+							<RadioButton fx:id="rdoReporte1" layoutX="50.0" layoutY="115.0" text="1. Usuarios que ingresaron/salieron en una fecha." toggleGroup="$tgReportes" />
+							<RadioButton fx:id="rdoReporte2" layoutX="50.0" layoutY="150.0" text="2. Jugadores por peso, estatura y equipo." toggleGroup="$tgReportes" />
+							<RadioButton fx:id="rdoReporte3" layoutX="50.0" layoutY="185.0" text="3. Valor total de jugadores por equipo y confederacion." toggleGroup="$tgReportes" />
+							<RadioButton fx:id="rdoReporte4" layoutX="50.0" layoutY="220.0" text="4. Paises que juegan en cada pais anfitrion." toggleGroup="$tgReportes" />
+							<DatePicker fx:id="dateReporte" layoutX="50.0" layoutY="265.0" prefHeight="32.0" prefWidth="200.0" promptText="Fecha reporte 1" visible="false" />
+							<TextField fx:id="textPesoReporte" layoutX="270.0" layoutY="265.0" prefHeight="32.0" prefWidth="120.0" promptText="Peso max" styleClass="text-field" visible="false" />
+							<TextField fx:id="textEstaturaReporte" layoutX="410.0" layoutY="265.0" prefHeight="32.0" prefWidth="120.0" promptText="Estatura max" styleClass="text-field" visible="false" />
+							<ComboBox fx:id="comboEquipoReporte" layoutX="50.0" layoutY="310.0" prefHeight="32.0" prefWidth="200.0" promptText="Equipo" visible="false" />
+							<ComboBox fx:id="comboConfederacionReporte" layoutX="270.0" layoutY="310.0" prefHeight="32.0" prefWidth="200.0" promptText="Confederacion" visible="false" />
+							<Button layoutX="50.0" layoutY="360.0" mnemonicParsing="false" onAction="#generarReporte" prefHeight="40.0" prefWidth="200.0" styleClass="action-button, add" text="Generar PDF" />
+						</children>
+					</AnchorPane>
 				</StackPane>
 			</center>
 		</BorderPane>

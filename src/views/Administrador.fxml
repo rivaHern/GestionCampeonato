@@ -25,21 +25,21 @@
 
 <!-- Pantalla principal del Mundial 2026 -->
 
-<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="800.0"
+<AnchorPane fx:id="root" prefHeight="700.0" prefWidth="850.0"
 	styleClass="root-pane" stylesheets="@styles/Administrador.css"
 	xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="controllers.AdministradorController">
 	<children>
-		<BorderPane prefHeight="600.0" prefWidth="800.0"
+		<BorderPane prefHeight="700.0" prefWidth="850.0"
 			stylesheets="@styles/Administrador.css">
 
 			<!-- ========== MENÚ LATERAL IZQUIERDO ========== -->
 			<left>
-				<AnchorPane prefHeight="600.0" prefWidth="180.0"
+				<AnchorPane prefHeight="700.0" prefWidth="180.0"
 					styleClass="sidebar" BorderPane.alignment="CENTER">
 					<children>
 						<!-- GridPane que organiza todas las filas del menú -->
-						<GridPane layoutX="8.0" layoutY="18.0" prefHeight="566.0"
+						<GridPane layoutX="8.0" layoutY="18.0" prefHeight="700.0"
 							prefWidth="180.0">
 							<columnConstraints>
 								<ColumnConstraints hgrow="SOMETIMES"
@@ -224,9 +224,10 @@
 														<Font name="System Bold" size="44.0" />
 													</font>
 												</Text>
-												<!-- <Text fx:id="textUsuario" strokeType="OUTSIDE" strokeWidth="0.0" 
-													style="-fx-fill: #38bdf8;" text="usuario"> <font> <Font name="System Bold" 
-													size="44.0" /> </font> </Text> -->
+												<Text fx:id="textNombreUsuario" strokeType="OUTSIDE" strokeWidth="0.0"
+													style="-fx-fill: #38bdf8;" text="">
+													<font><Font name="System Bold" size="44.0" /></font>
+												</Text>
 												<Text strokeType="OUTSIDE" strokeWidth="0.0"
 													style="-fx-fill: #f8fafc;" text="!">
 													<font>
