@@ -12,7 +12,8 @@ public class Main extends Application {
 		try {
 
 			
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/administrador.fxml"));
+			//FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/administrador.fxml"));
+FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
 			//FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
 
 			Parent root = loader.load();

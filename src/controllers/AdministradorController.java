@@ -1,8 +1,22 @@
 package controllers;
 
 import application.Conexion;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.Phrase;
+import java.io.FileOutputStream;
+import java.io.File;
+import javafx.stage.FileChooser;
 import model.Bitacora;
 import model.Usuario;
+import model.Jugador;
+import model.Equipo;
+import model.Partido;
 import emun.Rol;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -250,7 +264,29 @@ public class AdministradorController {
 	@FXML
 	private PasswordField textContrasenia;
 
+	// Parametros consultas
+	@FXML private ComboBox<String> comboConfederacionConsulta;
+	@FXML private ComboBox<String> comboEstadioConsulta;
+	@FXML private ComboBox<String> comboPaisConsulta;
+	@FXML private TextField textEdadConsulta;
+
+	// Parametros consultas
+
+	// Reportes
+	@FXML private RadioButton rdoReporte1;
+	@FXML private RadioButton rdoReporte2;
+	@FXML private RadioButton rdoReporte3;
+	@FXML private RadioButton rdoReporte4;
+	@FXML private ToggleGroup tgReportes;
+	@FXML private DatePicker dateReporte;
+	@FXML private TextField textPesoReporte;
+	@FXML private TextField textEstaturaReporte;
+	@FXML private ComboBox<String> comboEquipoReporte;
+	@FXML private ComboBox<String> comboConfederacionReporte;
+	@FXML private AnchorPane reportesPane;
+
 	// Labels de inicio
+	@FXML private Text textNombreUsuario;
 	@FXML
 	private Text textfecha;
 	@FXML
@@ -259,6 +295,23 @@ public class AdministradorController {
 	// Variables de control de la sesión
 	private int idUsuarioActual;
 	private String usernameActual;
+
+	public static int staticIdUsuario = 0;
+	public static String staticUsername = "";
+	public static Rol staticRol = null;
+
+	public static void setUsuarioActual(int id, String username, Rol rol) {
+		staticIdUsuario = id;
+		staticUsername = username;
+		staticRol = rol;
+	}
+
+	@FXML
+	void initialize_session() {
+		idUsuarioActual = staticIdUsuario;
+		usernameActual = staticUsername;
+		if (textNombreUsuario != null) textNombreUsuario.setText(usernameActual);
+	}
 	private int idUsuarioSeleccionado = -1;
 
 	@FXML
@@ -267,7 +320,24 @@ public class AdministradorController {
 		initRoleCombo();
 		initUsuarioTable();
 		initBitacoraTable();
+		initEquiposTable();
+		initJugadoresTable();
+		initPartidosTable();
+		initialize_session();
+		if (tgConsultas != null) {
+			tgConsultas.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+				if (newVal != null) actualizarParametrosConsulta();
+			});
+		}
 		showPane(inicioPane);
+
+		// Ocultar paneles de admin si no es ADMINISTRADOR
+		if (staticRol != Rol.ADMINISTRADOR) {
+			if (usuariosPane != null) usuariosPane.setVisible(false);
+			if (bitacoraPane != null) bitacoraPane.setVisible(false);
+			if (btnUsuario != null) btnUsuario.setVisible(false);
+			if (btnBitacora != null) btnBitacora.setVisible(false);
+		}
 	}
 
 	private void initDateTime() {
@@ -339,12 +409,33 @@ public class AdministradorController {
 			showPane(bitacoraPane);
 		} else if (event.getSource() == btnEquipos) {
 			showPane(equiposPane);
+			cargarComboConfederaciones();
+			cargarEquipos();
 		} else if (event.getSource() == btnJugadores) {
 			showPane(jugadoresPane);
+			cargarComboEquipos();
+			cargarJugadores();
 		} else if (event.getSource() == btnPartidos) {
 			showPane(partidosPane);
-		} else if (event.getSource() == btnConsultas) {
+			cargarCombosPartidos();
+			cargarPartidos();
+		} else if (event.getSource() == btnReportes) {
+			showPane(reportesPane);
+			cargarCombosReportes();
+			inicializarCamposReportes();
+} else if (event.getSource() == btnConsultas) {
 			showPane(consultasPane);
+			if (combSeleccioneEstadio != null) combSeleccioneEstadio.setVisible(false);
+			if (textParametroBusqueda != null) textParametroBusqueda.setVisible(false);
+			if (combSeleccioneEstadio != null) {
+				ObservableList<String> estadios = FXCollections.observableArrayList();
+				try (Connection conn = Conexion.getConexion();
+				     PreparedStatement ps = conn.prepareStatement("SELECT nombre FROM Estadio ORDER BY nombre");
+				     ResultSet rs = ps.executeQuery()) {
+					while (rs.next()) estadios.add(rs.getString("nombre"));
+				} catch (Exception ex) { ex.printStackTrace(); }
+				((ComboBox<String>)combSeleccioneEstadio).setItems(estadios);
+			}
 		} else {
 			showPane(inicioPane);
 		}
@@ -371,6 +462,9 @@ public class AdministradorController {
 		}
 		if (consultasPane != null) {
 			consultasPane.setVisible(false);
+		}
+		if (reportesPane != null) {
+			reportesPane.setVisible(false);
 		}
 		if (pane != null) {
 			pane.setVisible(true);
@@ -558,63 +652,920 @@ public class AdministradorController {
 	}
 
 	// ========== MÉTODOS PENDIENTES ==========
+	// ========== EQUIPOS ==========
+	private int idEquipoSeleccionado = -1;
+
+	@SuppressWarnings("unchecked")
+	private void initEquiposTable() {
+		if (tabGE == null || colIDGE == null) return;
+		((TableColumn<Equipo, Integer>) colIDGE).setCellValueFactory(new PropertyValueFactory<>("id"));
+		((TableColumn<Equipo, String>) colEquiposGE).setCellValueFactory(new PropertyValueFactory<>("nombre"));
+		((TableColumn<Equipo, String>) colDirectorTecnicoGE).setCellValueFactory(new PropertyValueFactory<>("directorTecnico"));
+		((TableColumn<Equipo, String>) colConfederacionGE).setCellValueFactory(new PropertyValueFactory<>("confederacion"));
+	}
+
+	@SuppressWarnings("unchecked")
+	private void cargarEquipos() {
+		if (tabGE == null) return;
+		ObservableList<Equipo> lista = FXCollections.observableArrayList();
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(
+			"SELECT e.id_equipo, e.nombre, c.nombre as confederacion, "
+			+ "ISNULL(d.nombre + ' ' + d.apellido, 'Sin DT') as director "
+			+ "FROM Equipo e "
+			+ "JOIN Confederacion c ON e.id_confederacion = c.id_confederacion "
+			+ "LEFT JOIN DirectorTecnico d ON e.id_equipo = d.id_equipo")) {
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					lista.add(new Equipo(
+						rs.getInt("id_equipo"),
+						rs.getString("nombre"),
+						rs.getString("confederacion"),
+						rs.getString("director")));
+				}
+			}
+			TableView<Equipo> tab = (TableView<Equipo>) tabGE;
+			tab.setItems(lista);
+			tab.setOnMouseClicked(e -> {
+				Equipo eq = tab.getSelectionModel().getSelectedItem();
+				if (eq != null) {
+					idEquipoSeleccionado = eq.getId();
+					if (textEquipoPais != null) textEquipoPais.setText(eq.getNombre());
+					if (textEquipoDirectorTecnico != null) textEquipoDirectorTecnico.setText(eq.getDirectorTecnico());
+					if (comboxEquipoConfederacion != null) ((ComboBox<String>)comboxEquipoConfederacion).setValue(eq.getConfederacion());
+				}
+			});
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
+	}
+
+	private void cargarComboConfederaciones() {
+		if (comboxEquipoConfederacion == null) return;
+		ObservableList<String> confs = FXCollections.observableArrayList();
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement("SELECT siglas FROM Confederacion ORDER BY siglas");
+		     ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) confs.add(rs.getString("siglas"));
+			((ComboBox<String>)comboxEquipoConfederacion).setItems(confs);
+		} catch (Exception e) { e.printStackTrace(); }
+	}
+
+	private void limpiarCamposEquipos() {
+		if (textEquipoPais != null) textEquipoPais.clear();
+		if (textEquipoDirectorTecnico != null) textEquipoDirectorTecnico.clear();
+		if (comboxEquipoConfederacion != null) ((ComboBox<String>)comboxEquipoConfederacion).setValue(null);
+		idEquipoSeleccionado = -1;
+	}
+
 	@FXML
 	void agregarEquipos(ActionEvent event) {
-		System.out.println("pendiente - agregarEquipos");
+		String nombre = textEquipoPais.getText().trim();
+		String confederacion = ((ComboBox<String>)comboxEquipoConfederacion).getValue();
+		if (nombre.isEmpty() || confederacion == null) {
+			mostrarAlerta("Error", "Complete nombre y confederacion.");
+			return;
+		}
+		try (Connection conn = Conexion.getConexion()) {
+			int idConf = 0;
+			try (PreparedStatement ps2 = conn.prepareStatement("SELECT id_confederacion FROM Confederacion WHERE nombre = ? OR siglas = ?")) {
+				ps2.setString(1, confederacion); ps2.setString(2, confederacion);
+				ResultSet rs2 = ps2.executeQuery();
+				if (rs2.next()) idConf = rs2.getInt(1);
+			}
+			try (PreparedStatement ps = conn.prepareStatement(
+				"INSERT INTO Equipo (nombre, id_confederacion, id_pais, valor_total) VALUES (?,?,1,0)")) {
+				ps.setString(1, nombre); ps.setInt(2, idConf);
+				ps.executeUpdate();
+			}
+			limpiarCamposEquipos(); cargarEquipos();
+			mostrarInfo("Exito", "Equipo agregado.");
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
 	}
 
 	@FXML
 	void actualizarEquipos(ActionEvent event) {
-		System.out.println("pendiente - actualizarEquipos");
+		if (idEquipoSeleccionado == -1) { mostrarAlerta("Error", "Seleccione un equipo."); return; }
+		String nombre = textEquipoPais.getText().trim();
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement("UPDATE Equipo SET nombre=? WHERE id_equipo=?")) {
+			ps.setString(1, nombre); ps.setInt(2, idEquipoSeleccionado);
+			ps.executeUpdate();
+			limpiarCamposEquipos(); cargarEquipos();
+			mostrarInfo("Exito", "Equipo actualizado.");
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
 	}
 
 	@FXML
 	void buscarEquipos(ActionEvent event) {
-		System.out.println("pendiente - buscarEquipos");
+		String buscar = textEquipoPais.getText().trim();
+		ObservableList<Equipo> lista = FXCollections.observableArrayList();
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(
+			"SELECT e.id_equipo, e.nombre, c.nombre as confederacion, "
+			+ "ISNULL(d.nombre + ' ' + d.apellido, 'Sin DT') as director "
+			+ "FROM Equipo e "
+			+ "JOIN Confederacion c ON e.id_confederacion = c.id_confederacion "
+			+ "LEFT JOIN DirectorTecnico d ON e.id_equipo = d.id_equipo "
+			+ "WHERE e.nombre LIKE ?")) {
+			ps.setString(1, "%" + buscar + "%");
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) lista.add(new Equipo(
+					rs.getInt("id_equipo"), rs.getString("nombre"),
+					rs.getString("confederacion"), rs.getString("director")));
+			}
+			((TableView<Equipo>)tabGE).setItems(lista);
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
 	}
 
 	@FXML
 	void eliminarEquipos(ActionEvent event) {
-		System.out.println("pendiente - eliminarEquipos");
+		if (idEquipoSeleccionado == -1) { mostrarAlerta("Error", "Seleccione un equipo."); return; }
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement("DELETE FROM Equipo WHERE id_equipo=?")) {
+			ps.setInt(1, idEquipoSeleccionado);
+			ps.executeUpdate();
+			limpiarCamposEquipos(); cargarEquipos();
+			mostrarInfo("Exito", "Equipo eliminado.");
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void initJugadoresTable() {
+		System.out.println("initJugadoresTable tabGJ=" + tabGJ + " colIDGJ=" + colIDGJ);
+		if (tabGJ == null || colIDGJ == null) return;
+		((TableColumn<Jugador, Integer>) colIDGJ).setCellValueFactory(new PropertyValueFactory<>("id"));
+		((TableColumn<Jugador, String>) colNombreGJ).setCellValueFactory(new PropertyValueFactory<>("nombre"));
+		((TableColumn<Jugador, Double>) colPesoGJ).setCellValueFactory(new PropertyValueFactory<>("peso"));
+		((TableColumn<Jugador, Double>) colEstaturaGJ).setCellValueFactory(new PropertyValueFactory<>("estatura"));
+		((TableColumn<Jugador, Double>) colCostoGJ).setCellValueFactory(new PropertyValueFactory<>("valor"));
+		((TableColumn<Jugador, String>) colEquipoGJ).setCellValueFactory(new PropertyValueFactory<>("nombreEquipo"));
+		((TableColumn<Jugador, Integer>) colEdadGJ).setCellValueFactory(new PropertyValueFactory<>("edad"));
+	}
+
+	// ========== JUGADORES ==========
+	private int idJugadorSeleccionado = -1;
+
+	private void cargarJugadores() {
+		if (tabGJ == null) return;
+		ObservableList<Jugador> lista = FXCollections.observableArrayList();
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(
+			"SELECT j.id_jugador, j.nombre, j.apellido, j.fecha_nacimiento, " +
+			"j.peso, j.estatura, j.posicion, j.valor, j.id_equipo, e.nombre as nombre_equipo, " +
+			"DATEDIFF(YEAR, j.fecha_nacimiento, GETDATE()) as edad " +
+			"FROM Jugador j JOIN Equipo e ON j.id_equipo = e.id_equipo")) {
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					lista.add(new Jugador(
+						rs.getInt("id_jugador"), rs.getString("nombre"), rs.getString("apellido"),
+						rs.getDate("fecha_nacimiento") != null ? rs.getDate("fecha_nacimiento").toLocalDate() : null,
+						rs.getDouble("peso"), rs.getDouble("estatura"), rs.getString("posicion"),
+						rs.getDouble("valor"), rs.getInt("id_equipo"), rs.getString("nombre_equipo")));
+						lista.get(lista.size()-1).setEdad(rs.getInt("edad"));
+				}
+			}
+			TableView<Jugador> tab = (TableView<Jugador>) tabGJ;
+			tab.setItems(lista);
+			System.out.println("Jugadores cargados: " + lista.size());
+			tab.setOnMouseClicked(e -> {
+				Jugador j = tab.getSelectionModel().getSelectedItem();
+				if (j != null) {
+					idJugadorSeleccionado = j.getId();
+					if (textNombreGJ != null) textNombreGJ.setText(j.getNombre());
+					if (textPesoGJ != null) textPesoGJ.setText(String.valueOf(j.getPeso()));
+					if (textEstaturaGJ != null) textEstaturaGJ.setText(String.valueOf(j.getEstatura()));
+					if (textCostoGJ != null) textCostoGJ.setText(String.valueOf(j.getValor()));
+					if (comboxEquipoGJ != null) ((ComboBox<String>)comboxEquipoGJ).setValue(j.getNombreEquipo());
+					if (textEdadGJ != null) textEdadGJ.setText(String.valueOf(j.getEdad()));
+				}
+			});
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
+	}
+
+	private void cargarComboEquipos() {
+		if (comboxEquipoGJ == null) return;
+		ObservableList<String> equipos = FXCollections.observableArrayList();
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement("SELECT nombre FROM Equipo ORDER BY nombre")) {
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) equipos.add(rs.getString("nombre"));
+			}
+			((ComboBox<String>)comboxEquipoGJ).setItems(equipos);
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
+	}
+
+	private void limpiarCamposJugadores() {
+		if (textNombreGJ != null) textNombreGJ.clear();
+		if (textPesoGJ != null) textPesoGJ.clear();
+		if (textEstaturaGJ != null) textEstaturaGJ.clear();
+		if (textCostoGJ != null) textCostoGJ.clear();
+		if (textEdadGJ != null) textEdadGJ.clear();
+		if (comboxEquipoGJ != null) ((ComboBox<String>)comboxEquipoGJ).setValue(null);
+		idJugadorSeleccionado = -1;
 	}
 
 	@FXML
 	void agregarJugadores(ActionEvent event) {
+		String nombre = textNombreGJ.getText().trim();
+		String pesoStr = textPesoGJ.getText().trim();
+		String estaturaStr = textEstaturaGJ.getText().trim();
+		String costoStr = textCostoGJ.getText().trim();
+		String equipo = ((ComboBox<String>)comboxEquipoGJ).getValue();
+		if (nombre.isEmpty() || pesoStr.isEmpty() || estaturaStr.isEmpty() || costoStr.isEmpty() || equipo == null) {
+			mostrarAlerta("Error", "Complete todos los campos obligatorios.");
+			return;
+		}
+		try (Connection conn = Conexion.getConexion()) {
+			int idEquipo = 0;
+			try (PreparedStatement ps2 = conn.prepareStatement("SELECT id_equipo FROM Equipo WHERE nombre = ?")) {
+				ps2.setString(1, equipo);
+				ResultSet rs2 = ps2.executeQuery();
+				if (rs2.next()) idEquipo = rs2.getInt("id_equipo");
+			}
+			try (PreparedStatement ps = conn.prepareStatement(
+				"INSERT INTO Jugador (nombre, apellido, peso, estatura, posicion, valor, id_equipo) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+				ps.setString(1, nombre);
+				ps.setString(2, nombre);
+				ps.setDouble(3, Double.parseDouble(pesoStr));
+				ps.setDouble(4, Double.parseDouble(estaturaStr));
+				ps.setString(5, "Jugador");
+				ps.setDouble(6, Double.parseDouble(costoStr));
+				ps.setInt(7, idEquipo);
+				ps.executeUpdate();
+			}
+			limpiarCamposJugadores();
+			cargarJugadores();
+			mostrarInfo("Éxito", "Jugador agregado correctamente.");
+		} catch (Exception e) {
+			mostrarAlerta("Error", "Error al agregar jugador: " + e.getMessage());
+		}
 	}
 
 	@FXML
 	void actualizarJugadores(ActionEvent event) {
+		if (idJugadorSeleccionado == -1) {
+			mostrarAlerta("Error", "Seleccione un jugador de la tabla.");
+			return;
+		}
+		String equipo = ((ComboBox<String>)comboxEquipoGJ).getValue();
+		try (Connection conn = Conexion.getConexion()) {
+			int idEquipo = 0;
+			try (PreparedStatement ps2 = conn.prepareStatement("SELECT id_equipo FROM Equipo WHERE nombre = ?")) {
+				ps2.setString(1, equipo);
+				ResultSet rs2 = ps2.executeQuery();
+				if (rs2.next()) idEquipo = rs2.getInt("id_equipo");
+			}
+			try (PreparedStatement ps = conn.prepareStatement(
+				"UPDATE Jugador SET nombre=?, peso=?, estatura=?, valor=?, id_equipo=? WHERE id_jugador=?")) {
+				ps.setString(1, textNombreGJ.getText().trim());
+				ps.setDouble(2, Double.parseDouble(textPesoGJ.getText().trim()));
+				ps.setDouble(3, Double.parseDouble(textEstaturaGJ.getText().trim()));
+				ps.setDouble(4, Double.parseDouble(textCostoGJ.getText().trim()));
+				ps.setInt(5, idEquipo);
+				ps.setInt(6, idJugadorSeleccionado);
+				ps.executeUpdate();
+			}
+			limpiarCamposJugadores();
+			cargarJugadores();
+			mostrarInfo("Éxito", "Jugador actualizado correctamente.");
+		} catch (Exception e) {
+			mostrarAlerta("Error", "Error al actualizar: " + e.getMessage());
+		}
 	}
 
 	@FXML
 	void buscarJugadores(ActionEvent event) {
+		String buscar = textNombreGJ.getText().trim();
+		ObservableList<Jugador> lista = FXCollections.observableArrayList();
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(
+			"SELECT j.id_jugador, j.nombre, j.apellido, j.fecha_nacimiento, j.peso, j.estatura, " +
+			"j.posicion, j.valor, j.id_equipo, e.nombre as nombre_equipo " +
+			"FROM Jugador j JOIN Equipo e ON j.id_equipo = e.id_equipo " +
+			"WHERE j.nombre LIKE ? OR j.apellido LIKE ?")) {
+			ps.setString(1, "%" + buscar + "%");
+			ps.setString(2, "%" + buscar + "%");
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					lista.add(new Jugador(
+						rs.getInt("id_jugador"), rs.getString("nombre"), rs.getString("apellido"),
+						rs.getDate("fecha_nacimiento") != null ? rs.getDate("fecha_nacimiento").toLocalDate() : null,
+						rs.getDouble("peso"), rs.getDouble("estatura"), rs.getString("posicion"),
+						rs.getDouble("valor"), rs.getInt("id_equipo"), rs.getString("nombre_equipo")));
+				}
+			}
+			((TableView<Jugador>)tabGJ).setItems(lista);
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
 	}
 
 	@FXML
 	void eliminarJugadores(ActionEvent event) {
+		if (idJugadorSeleccionado == -1) {
+			mostrarAlerta("Error", "Seleccione un jugador de la tabla.");
+			return;
+		}
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement("DELETE FROM Jugador WHERE id_jugador=?")) {
+			ps.setInt(1, idJugadorSeleccionado);
+			ps.executeUpdate();
+			limpiarCamposJugadores();
+			cargarJugadores();
+			mostrarInfo("Éxito", "Jugador eliminado.");
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
+	}
+
+	// ========== PARTIDOS ==========
+	private int idPartidoSeleccionado = -1;
+
+	@SuppressWarnings("unchecked")
+	private void initPartidosTable() {
+		if (tabPartidos == null || colIDPartidos == null) return;
+		((TableColumn<Partido, Integer>) colIDPartidos).setCellValueFactory(new PropertyValueFactory<>("id"));
+		((TableColumn<Partido, String>) colGrupoPartidos).setCellValueFactory(new PropertyValueFactory<>("grupo"));
+		((TableColumn<Partido, String>) colFechaPartidos).setCellValueFactory(new PropertyValueFactory<>("fecha"));
+		((TableColumn<Partido, String>) colLocalPartidos).setCellValueFactory(new PropertyValueFactory<>("equipoLocal"));
+		((TableColumn<Partido, String>) colVisitantePartidos).setCellValueFactory(new PropertyValueFactory<>("equipoVisitante"));
+		((TableColumn<Partido, String>) colEstadioPartidos).setCellValueFactory(new PropertyValueFactory<>("estadio"));
+	}
+
+	private void cargarPartidos() {
+		if (tabPartidos == null) return;
+		ObservableList<Partido> lista = FXCollections.observableArrayList();
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(
+			"SELECT p.id_partido, p.fecha, el.nombre as local, ev.nombre as visitante, "
+			+ "e.nombre as estadio, g.nombre as grupo "
+			+ "FROM Partido p "
+			+ "JOIN Equipo el ON p.id_equipo_local = el.id_equipo "
+			+ "JOIN Equipo ev ON p.id_equipo_visitante = ev.id_equipo "
+			+ "JOIN Estadio e ON p.id_estadio = e.id_estadio "
+			+ "JOIN Grupo g ON p.id_grupo = g.id_grupo")) {
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					java.sql.Timestamp ts = rs.getTimestamp("fecha");
+					lista.add(new Partido(
+						rs.getInt("id_partido"),
+						ts != null ? ts.toLocalDateTime() : null,
+						0, 0, 0, 0,
+						rs.getString("local"),
+						rs.getString("visitante"),
+						rs.getString("estadio"),
+						rs.getString("grupo")));
+				}
+			}
+			TableView<Partido> tab = (TableView<Partido>) tabPartidos;
+			tab.setItems(lista);
+			tab.setOnMouseClicked(e -> {
+				Partido p = tab.getSelectionModel().getSelectedItem();
+				if (p != null) {
+					idPartidoSeleccionado = p.getId();
+					if (comboxPartidoLocal != null) ((ComboBox<String>)comboxPartidoLocal).setValue(p.getEquipoLocal());
+					if (comboxPartidoVisitante != null) ((ComboBox<String>)comboxPartidoVisitante).setValue(p.getEquipoVisitante());
+					if (comboxPartidoEstadio != null) ((ComboBox<String>)comboxPartidoEstadio).setValue(p.getEstadio());
+					if (comboxPartidoGrupo != null) ((ComboBox<String>)comboxPartidoGrupo).setValue(p.getGrupo());
+					if (DatePartido != null && p.getFecha() != null) DatePartido.setValue(p.getFecha().toLocalDate());
+				}
+			});
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
+	}
+
+	private void cargarCombosPartidos() {
+		try (Connection conn = Conexion.getConexion()) {
+			ObservableList<String> equipos = FXCollections.observableArrayList();
+			try (PreparedStatement ps = conn.prepareStatement("SELECT nombre FROM Equipo ORDER BY nombre");
+			     ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) equipos.add(rs.getString("nombre"));
+			}
+			if (comboxPartidoLocal != null) ((ComboBox<String>)comboxPartidoLocal).setItems(equipos);
+			if (comboxPartidoVisitante != null) ((ComboBox<String>)comboxPartidoVisitante).setItems(FXCollections.observableArrayList(equipos));
+
+			ObservableList<String> estadios = FXCollections.observableArrayList();
+			try (PreparedStatement ps = conn.prepareStatement("SELECT nombre FROM Estadio ORDER BY nombre");
+			     ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) estadios.add(rs.getString("nombre"));
+			}
+			if (comboxPartidoEstadio != null) ((ComboBox<String>)comboxPartidoEstadio).setItems(estadios);
+
+			ObservableList<String> grupos = FXCollections.observableArrayList();
+			try (PreparedStatement ps = conn.prepareStatement("SELECT nombre FROM Grupo ORDER BY nombre");
+			     ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) grupos.add(rs.getString("nombre"));
+			}
+			if (comboxPartidoGrupo != null) ((ComboBox<String>)comboxPartidoGrupo).setItems(grupos);
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
+	}
+
+	private void limpiarCamposPartidos() {
+		if (comboxPartidoLocal != null) ((ComboBox<String>)comboxPartidoLocal).setValue(null);
+		if (comboxPartidoVisitante != null) ((ComboBox<String>)comboxPartidoVisitante).setValue(null);
+		if (comboxPartidoEstadio != null) ((ComboBox<String>)comboxPartidoEstadio).setValue(null);
+		if (comboxPartidoGrupo != null) ((ComboBox<String>)comboxPartidoGrupo).setValue(null);
+		if (DatePartido != null) DatePartido.setValue(null);
+		idPartidoSeleccionado = -1;
 	}
 
 	@FXML
 	void agregarPartidos(ActionEvent event) {
+		String local = ((ComboBox<String>)comboxPartidoLocal).getValue();
+		String visitante = ((ComboBox<String>)comboxPartidoVisitante).getValue();
+		String estadio = ((ComboBox<String>)comboxPartidoEstadio).getValue();
+		String grupo = ((ComboBox<String>)comboxPartidoGrupo).getValue();
+		if (local == null || visitante == null || estadio == null || grupo == null || DatePartido.getValue() == null) {
+			mostrarAlerta("Error", "Complete todos los campos.");
+			return;
+		}
+		try (Connection conn = Conexion.getConexion()) {
+			int idLocal = 0, idVisitante = 0, idEstadio = 0, idGrupo = 0;
+			try (PreparedStatement ps = conn.prepareStatement("SELECT id_equipo FROM Equipo WHERE nombre=?")) {
+				ps.setString(1, local); ResultSet rs = ps.executeQuery(); if (rs.next()) idLocal = rs.getInt(1);
+			}
+			try (PreparedStatement ps = conn.prepareStatement("SELECT id_equipo FROM Equipo WHERE nombre=?")) {
+				ps.setString(1, visitante); ResultSet rs = ps.executeQuery(); if (rs.next()) idVisitante = rs.getInt(1);
+			}
+			try (PreparedStatement ps = conn.prepareStatement("SELECT id_estadio FROM Estadio WHERE nombre=?")) {
+				ps.setString(1, estadio); ResultSet rs = ps.executeQuery(); if (rs.next()) idEstadio = rs.getInt(1);
+			}
+			try (PreparedStatement ps = conn.prepareStatement("SELECT id_grupo FROM Grupo WHERE nombre=?")) {
+				ps.setString(1, grupo); ResultSet rs = ps.executeQuery(); if (rs.next()) idGrupo = rs.getInt(1);
+			}
+			try (PreparedStatement ps = conn.prepareStatement(
+				"INSERT INTO Partido (fecha, id_equipo_local, id_equipo_visitante, id_estadio, id_grupo) VALUES (?,?,?,?,?)")) {
+				ps.setTimestamp(1, java.sql.Timestamp.valueOf(DatePartido.getValue().atStartOfDay()));
+				ps.setInt(2, idLocal); ps.setInt(3, idVisitante);
+				ps.setInt(4, idEstadio); ps.setInt(5, idGrupo);
+				ps.executeUpdate();
+			}
+			limpiarCamposPartidos(); cargarPartidos();
+			mostrarInfo("Éxito", "Partido agregado.");
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
 	}
 
 	@FXML
 	void actualizarPartidos(ActionEvent event) {
+		if (idPartidoSeleccionado == -1) { mostrarAlerta("Error", "Seleccione un partido."); return; }
+		String local = ((ComboBox<String>)comboxPartidoLocal).getValue();
+		String visitante = ((ComboBox<String>)comboxPartidoVisitante).getValue();
+		String estadio = ((ComboBox<String>)comboxPartidoEstadio).getValue();
+		String grupo = ((ComboBox<String>)comboxPartidoGrupo).getValue();
+		try (Connection conn = Conexion.getConexion()) {
+			int idLocal = 0, idVisitante = 0, idEstadio = 0, idGrupo = 0;
+			try (PreparedStatement ps = conn.prepareStatement("SELECT id_equipo FROM Equipo WHERE nombre=?")) {
+				ps.setString(1, local); ResultSet rs = ps.executeQuery(); if (rs.next()) idLocal = rs.getInt(1);
+			}
+			try (PreparedStatement ps = conn.prepareStatement("SELECT id_equipo FROM Equipo WHERE nombre=?")) {
+				ps.setString(1, visitante); ResultSet rs = ps.executeQuery(); if (rs.next()) idVisitante = rs.getInt(1);
+			}
+			try (PreparedStatement ps = conn.prepareStatement("SELECT id_estadio FROM Estadio WHERE nombre=?")) {
+				ps.setString(1, estadio); ResultSet rs = ps.executeQuery(); if (rs.next()) idEstadio = rs.getInt(1);
+			}
+			try (PreparedStatement ps = conn.prepareStatement("SELECT id_grupo FROM Grupo WHERE nombre=?")) {
+				ps.setString(1, grupo); ResultSet rs = ps.executeQuery(); if (rs.next()) idGrupo = rs.getInt(1);
+			}
+			try (PreparedStatement ps = conn.prepareStatement(
+				"UPDATE Partido SET fecha=?, id_equipo_local=?, id_equipo_visitante=?, id_estadio=?, id_grupo=? WHERE id_partido=?")) {
+				ps.setTimestamp(1, DatePartido.getValue() != null ? java.sql.Timestamp.valueOf(DatePartido.getValue().atStartOfDay()) : null);
+				ps.setInt(2, idLocal); ps.setInt(3, idVisitante);
+				ps.setInt(4, idEstadio); ps.setInt(5, idGrupo);
+				ps.setInt(6, idPartidoSeleccionado);
+				ps.executeUpdate();
+			}
+			limpiarCamposPartidos(); cargarPartidos();
+			mostrarInfo("Éxito", "Partido actualizado.");
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
 	}
 
 	@FXML
 	void buscarPartidos(ActionEvent event) {
+		String grupo = comboxPartidoGrupo != null ? ((ComboBox<String>)comboxPartidoGrupo).getValue() : null;
+		ObservableList<Partido> lista = FXCollections.observableArrayList();
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(
+			"SELECT p.id_partido, p.fecha, el.nombre as local, ev.nombre as visitante, "
+			+ "e.nombre as estadio, g.nombre as grupo "
+			+ "FROM Partido p "
+			+ "JOIN Equipo el ON p.id_equipo_local = el.id_equipo "
+			+ "JOIN Equipo ev ON p.id_equipo_visitante = ev.id_equipo "
+			+ "JOIN Estadio e ON p.id_estadio = e.id_estadio "
+			+ "JOIN Grupo g ON p.id_grupo = g.id_grupo "
+			+ "WHERE g.nombre LIKE ?")) {
+			ps.setString(1, "%" + (grupo != null ? grupo : "") + "%");
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					java.sql.Timestamp ts = rs.getTimestamp("fecha");
+					lista.add(new Partido(rs.getInt("id_partido"),
+						ts != null ? ts.toLocalDateTime() : null,
+						0, 0, 0, 0,
+						rs.getString("local"), rs.getString("visitante"),
+						rs.getString("estadio"), rs.getString("grupo")));
+				}
+			}
+			((TableView<Partido>)tabPartidos).setItems(lista);
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
 	}
 
 	@FXML
 	void eliminarPartidos(ActionEvent event) {
+		if (idPartidoSeleccionado == -1) { mostrarAlerta("Error", "Seleccione un partido."); return; }
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement("DELETE FROM Partido WHERE id_partido=?")) {
+			ps.setInt(1, idPartidoSeleccionado);
+			ps.executeUpdate();
+			limpiarCamposPartidos(); cargarPartidos();
+			mostrarInfo("Éxito", "Partido eliminado.");
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
 	}
 
 	@FXML
 	void ejecutarConsultas(ActionEvent event) {
+		if (tabConsultas == null) return;
+		RadioButton seleccionado = (RadioButton) tgConsultas.getSelectedToggle();
+		if (seleccionado == null) { mostrarAlerta("Error", "Seleccione una consulta."); return; }
+		if (seleccionado == rdoConsulta1) consultaJugadorMasCostosoPorConfederacion();
+		else if (seleccionado == rdoConsulta2) consultaPartidosPorEstadio();
+		else if (seleccionado == rdoConsulta3) consultaEquipoMasCostosoPorPaisAnfitrion();
+		else if (seleccionado == rdoConsulta4) consultaJugadoresMenores21();
 	}
 
-	// ========== CERRAR SESIÓN ==========
+	@SuppressWarnings("unchecked")
+	private void consultaJugadorMasCostosoPorConfederacion() {
+		String filtroConf = textParametroBusqueda != null && !textParametroBusqueda.getText().trim().isEmpty()
+			? textParametroBusqueda.getText().trim() : null;
+		ObservableList<javafx.beans.property.SimpleStringProperty[]> lista = FXCollections.observableArrayList();
+		String sql = "SELECT c.nombre as confederacion, j.nombre + ' ' + j.apellido as jugador, MAX(j.valor) as valor "
+			+ "FROM Jugador j "
+			+ "JOIN Equipo e ON j.id_equipo = e.id_equipo "
+			+ "JOIN Confederacion c ON e.id_confederacion = c.id_confederacion "
+			+ "GROUP BY c.nombre, j.nombre, j.apellido "
+			+ "ORDER BY c.nombre, valor DESC";
+		ejecutarConsultaGenerica(sql, new String[]{"Confederación", "Jugador", "Valor"});
+	}
+
+	private void consultaPartidosPorEstadio() {
+		String estadio = combSeleccioneEstadio != null ? (String)((ComboBox<String>)combSeleccioneEstadio).getValue() : null;
+		if (estadio == null) { mostrarAlerta("Error", "Seleccione un estadio."); return; }
+		String sql = "SELECT p.id_partido, el.nombre as local, ev.nombre as visitante, "
+			+ "e.nombre as estadio, p.fecha "
+			+ "FROM Partido p "
+			+ "JOIN Equipo el ON p.id_equipo_local = el.id_equipo "
+			+ "JOIN Equipo ev ON p.id_equipo_visitante = ev.id_equipo "
+			+ "JOIN Estadio e ON p.id_estadio = e.id_estadio "
+			+ "WHERE e.nombre = '" + estadio + "'";
+		ejecutarConsultaGenerica(sql, new String[]{"ID", "Local", "Visitante", "Estadio", "Fecha"});
+	}
+
+	private void consultaEquipoMasCostosoPorPaisAnfitrion() {
+		String filtroPais = textParametroBusqueda != null && !textParametroBusqueda.getText().trim().isEmpty()
+			? textParametroBusqueda.getText().trim() : null;
+		String wherePais = filtroPais != null
+			? "WHERE p.nombre = '" + filtroPais + "' "
+			: "WHERE p.nombre IN ('México', 'Estados Unidos', 'Canadá') ";
+		String sql = "SELECT p.nombre as pais, e.nombre as equipo, SUM(j.valor) as valor_total "
+			+ "FROM Jugador j "
+			+ "JOIN Equipo e ON j.id_equipo = e.id_equipo "
+			+ "JOIN Pais p ON e.id_pais = p.id_pais "
+			+ wherePais
+			+ "GROUP BY p.nombre, e.nombre "
+			+ "ORDER BY p.nombre, valor_total DESC";
+		ejecutarConsultaGenerica(sql, new String[]{"País", "Equipo", "Valor Total"});
+	}
+
+	private void consultaJugadoresMenores21() {
+		int edad = 21;
+		try {
+			if (textParametroBusqueda != null && !textParametroBusqueda.getText().trim().isEmpty())
+				edad = Integer.parseInt(textParametroBusqueda.getText().trim());
+		} catch (NumberFormatException e) { edad = 21; }
+		String sql = "SELECT e.nombre as equipo, COUNT(j.id_jugador) as cantidad "
+			+ "FROM Jugador j "
+			+ "JOIN Equipo e ON j.id_equipo = e.id_equipo "
+			+ "WHERE DATEDIFF(YEAR, j.fecha_nacimiento, GETDATE()) < " + edad + " "
+			+ "GROUP BY e.nombre "
+			+ "ORDER BY cantidad DESC";
+		ejecutarConsultaGenerica(sql, new String[]{"Equipo", "Jugadores < 21 años"});
+	}
+
+	@SuppressWarnings("unchecked")
+	private void ejecutarConsultaGenerica(String sql, String[] columnas) {
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(sql);
+		     ResultSet rs = ps.executeQuery()) {
+			TableView<ObservableList<String>> tabla = (TableView<ObservableList<String>>) tabConsultas;
+			tabla.getColumns().clear();
+			for (int i = 0; i < columnas.length; i++) {
+				final int idx = i;
+				TableColumn<ObservableList<String>, String> col = new TableColumn<>(columnas[i]);
+				col.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().get(idx)));
+				tabla.getColumns().add(col);
+			}
+			ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
+			int numCols = rs.getMetaData().getColumnCount();
+			while (rs.next()) {
+				ObservableList<String> fila = FXCollections.observableArrayList();
+				for (int i = 1; i <= numCols; i++) {
+					String val = rs.getString(i);
+					fila.add(val != null ? val : "");
+				}
+				data.add(fila);
+			}
+			tabla.setItems(data);
+		} catch (Exception e) {
+			mostrarAlerta("Error", e.getMessage());
+		}
+	}
+
+	// ========== REPORTES PDF ==========
+
+	private void inicializarCamposReportes() {
+		if (dateReporte != null) dateReporte.setVisible(false);
+		if (textPesoReporte != null) textPesoReporte.setVisible(false);
+		if (textEstaturaReporte != null) textEstaturaReporte.setVisible(false);
+		if (comboEquipoReporte != null) comboEquipoReporte.setVisible(false);
+		if (comboConfederacionReporte != null) comboConfederacionReporte.setVisible(false);
+		// Agregar listener a los radio buttons
+		if (tgReportes != null) {
+			tgReportes.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+				if (newVal != null) onReporteSeleccionado(null);
+			});
+		}
+	}
+
+	private void actualizarParametrosConsulta() {
+		// Ocultar todos
+		if (combSeleccioneEstadio != null) combSeleccioneEstadio.setVisible(false);
+		if (textParametroBusqueda != null) textParametroBusqueda.setVisible(false);
+
+		RadioButton sel = (RadioButton) tgConsultas.getSelectedToggle();
+		if (sel == rdoConsulta1) {
+			// Confederacion — usar textParametroBusqueda como campo
+			if (textParametroBusqueda != null) {
+				textParametroBusqueda.setVisible(true);
+				textParametroBusqueda.setPromptText("Confederación (UEFA, CONMEBOL...)");
+			}
+		} else if (sel == rdoConsulta2) {
+			if (combSeleccioneEstadio != null) combSeleccioneEstadio.setVisible(true);
+		} else if (sel == rdoConsulta3) {
+			// País anfitrión — usar textParametroBusqueda
+			if (textParametroBusqueda != null) {
+				textParametroBusqueda.setVisible(true);
+				textParametroBusqueda.setPromptText("País: México, Estados Unidos o Canadá");
+			}
+		} else if (sel == rdoConsulta4) {
+			// Edad
+			if (textParametroBusqueda != null) {
+				textParametroBusqueda.setVisible(true);
+				textParametroBusqueda.setPromptText("Edad máxima (ej: 21)");
+			}
+		}
+	}
+
+
+	private void cargarCombosReportes() {
+		try (Connection conn = Conexion.getConexion()) {
+			ObservableList<String> equipos = FXCollections.observableArrayList();
+			try (PreparedStatement ps = conn.prepareStatement("SELECT nombre FROM Equipo ORDER BY nombre");
+			     ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) equipos.add(rs.getString("nombre"));
+			}
+			if (comboEquipoReporte != null) comboEquipoReporte.setItems(equipos);
+
+			ObservableList<String> confs = FXCollections.observableArrayList();
+			try (PreparedStatement ps = conn.prepareStatement("SELECT nombre FROM Confederacion ORDER BY nombre");
+			     ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) confs.add(rs.getString("nombre"));
+			}
+			if (comboConfederacionReporte != null) comboConfederacionReporte.setItems(confs);
+		} catch (Exception e) { e.printStackTrace(); }
+	}
+
+	@FXML
+	void onReporteSeleccionado(ActionEvent event) {
+		if (dateReporte != null) dateReporte.setVisible(false);
+		if (textPesoReporte != null) textPesoReporte.setVisible(false);
+		if (textEstaturaReporte != null) textEstaturaReporte.setVisible(false);
+		if (comboEquipoReporte != null) comboEquipoReporte.setVisible(false);
+		if (comboConfederacionReporte != null) comboConfederacionReporte.setVisible(false);
+
+		RadioButton sel = (RadioButton) tgReportes.getSelectedToggle();
+		if (sel == rdoReporte1) {
+			if (dateReporte != null) dateReporte.setVisible(true);
+		} else if (sel == rdoReporte2) {
+			if (textPesoReporte != null) textPesoReporte.setVisible(true);
+			if (textEstaturaReporte != null) textEstaturaReporte.setVisible(true);
+			if (comboEquipoReporte != null) comboEquipoReporte.setVisible(true);
+		} else if (sel == rdoReporte3) {
+			if (comboConfederacionReporte != null) comboConfederacionReporte.setVisible(true);
+			if (comboEquipoReporte != null) comboEquipoReporte.setVisible(true);
+		}
+		// Reporte 4 no necesita parámetros
+	}
+
+	@FXML
+	void generarReporte(ActionEvent event) {
+		if (tgReportes == null || tgReportes.getSelectedToggle() == null) {
+			mostrarAlerta("Error", "Seleccione un reporte.");
+			return;
+		}
+		RadioButton selNombre = (RadioButton) tgReportes.getSelectedToggle();
+		String nombreArchivo = "reporte.pdf";
+		if (selNombre == rdoReporte1) nombreArchivo = "reporte_bitacora.pdf";
+		else if (selNombre == rdoReporte2) nombreArchivo = "reporte_jugadores.pdf";
+		else if (selNombre == rdoReporte3) nombreArchivo = "reporte_valor_equipos.pdf";
+		else if (selNombre == rdoReporte4) nombreArchivo = "reporte_paises_anfitrion.pdf";
+
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Guardar Reporte PDF");
+		fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+		fc.setInitialFileName(generarNombreUnico(nombreArchivo));
+		File archivo = fc.showSaveDialog(btnReportes.getScene().getWindow());
+		if (archivo == null) return;
+
+		try {
+			RadioButton sel = (RadioButton) tgReportes.getSelectedToggle();
+			if (sel == rdoReporte1) generarReporte1(archivo);
+			else if (sel == rdoReporte2) generarReporte2(archivo);
+			else if (sel == rdoReporte3) generarReporte3(archivo);
+			else if (sel == rdoReporte4) generarReporte4(archivo);
+		} catch (Exception e) {
+			mostrarAlerta("Error", "Error generando PDF: " + e.getMessage());
+		}
+	}
+
+	private void generarReporte1(File archivo) throws Exception {
+		if (dateReporte.getValue() == null) { mostrarAlerta("Error", "Seleccione una fecha."); return; }
+		Document doc = new Document();
+		PdfWriter.getInstance(doc, new FileOutputStream(archivo));
+		doc.open();
+		doc.add(new Paragraph("REPORTE DE BITACORA - " + dateReporte.getValue(), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+		doc.add(new Paragraph(" "));
+		PdfPTable tabla = new PdfPTable(4);
+		tabla.setWidthPercentage(100);
+		for (String h : new String[]{"ID", "Usuario", "Entrada", "Salida"}) {
+			PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+			cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+			tabla.addCell(cell);
+		}
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(
+			"SELECT b.id_bitacora, u.username, b.fecha_entrada, b.fecha_salida "
+			+ "FROM Bitacora b JOIN Usuario u ON b.id_usuario = u.id_usuario "
+			+ "WHERE CAST(b.fecha_entrada AS DATE) = ?")) {
+			ps.setDate(1, java.sql.Date.valueOf(dateReporte.getValue()));
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					tabla.addCell(String.valueOf(rs.getInt("id_bitacora")));
+					tabla.addCell(rs.getString("username"));
+					tabla.addCell(rs.getString("fecha_entrada"));
+					String salida = rs.getString("fecha_salida");
+					tabla.addCell(salida != null ? salida : "En sesion");
+				}
+			}
+		}
+		doc.add(tabla);
+		doc.close();
+		mostrarInfo("Exito", "Reporte guardado en: " + archivo.getPath());
+	}
+
+	private void generarReporte2(File archivo) throws Exception {
+		Document doc = new Document();
+		PdfWriter.getInstance(doc, new FileOutputStream(archivo));
+		doc.open();
+		doc.add(new Paragraph("REPORTE DE JUGADORES", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+		doc.add(new Paragraph(" "));
+		PdfPTable tabla = new PdfPTable(6);
+		tabla.setWidthPercentage(100);
+		for (String h : new String[]{"Nombre", "Apellido", "Peso", "Estatura", "Valor", "Equipo"}) {
+			PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+			cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+			tabla.addCell(cell);
+		}
+		String sql = "SELECT j.nombre, j.apellido, j.peso, j.estatura, j.valor, e.nombre as equipo "
+			+ "FROM Jugador j JOIN Equipo e ON j.id_equipo = e.id_equipo WHERE 1=1";
+		if (!textPesoReporte.getText().trim().isEmpty())
+			sql += " AND j.peso <= " + textPesoReporte.getText().trim();
+		if (!textEstaturaReporte.getText().trim().isEmpty())
+			sql += " AND j.estatura <= " + textEstaturaReporte.getText().trim();
+		if (comboEquipoReporte.getValue() != null)
+			sql += " AND e.nombre = '" + comboEquipoReporte.getValue() + "'";
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(sql);
+		     ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				tabla.addCell(rs.getString("nombre"));
+				tabla.addCell(rs.getString("apellido"));
+				tabla.addCell(rs.getString("peso"));
+				tabla.addCell(rs.getString("estatura"));
+				tabla.addCell(rs.getString("valor"));
+				tabla.addCell(rs.getString("equipo"));
+			}
+		}
+		doc.add(tabla);
+		doc.close();
+		mostrarInfo("Exito", "Reporte guardado en: " + archivo.getPath());
+	}
+
+	private void generarReporte3(File archivo) throws Exception {
+		Document doc = new Document();
+		PdfWriter.getInstance(doc, new FileOutputStream(archivo));
+		doc.open();
+		doc.add(new Paragraph("REPORTE VALOR TOTAL POR EQUIPO Y CONFEDERACION", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+		doc.add(new Paragraph(" "));
+		PdfPTable tabla = new PdfPTable(3);
+		tabla.setWidthPercentage(100);
+		for (String h : new String[]{"Confederacion", "Equipo", "Valor Total"}) {
+			PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+			cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+			tabla.addCell(cell);
+		}
+		String whereClause = "";
+		if (comboConfederacionReporte.getValue() != null)
+			whereClause += "WHERE c.nombre = '" + comboConfederacionReporte.getValue() + "' ";
+		if (comboEquipoReporte.getValue() != null)
+			whereClause += (whereClause.isEmpty() ? "WHERE " : "AND ") + "e.nombre = '" + comboEquipoReporte.getValue() + "' ";
+		String sql = "SELECT c.nombre as confederacion, e.nombre as equipo, SUM(j.valor) as total "
+			+ "FROM Jugador j JOIN Equipo e ON j.id_equipo = e.id_equipo "
+			+ "JOIN Confederacion c ON e.id_confederacion = c.id_confederacion "
+			+ whereClause
+			+ "GROUP BY c.nombre, e.nombre ORDER BY c.nombre, total DESC";
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(sql);
+		     ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				tabla.addCell(rs.getString("confederacion"));
+				tabla.addCell(rs.getString("equipo"));
+				tabla.addCell(rs.getString("total"));
+			}
+		}
+		doc.add(tabla);
+		doc.close();
+		mostrarInfo("Exito", "Reporte guardado en: " + archivo.getPath());
+	}
+
+	private void generarReporte4(File archivo) throws Exception {
+		Document doc = new Document();
+		PdfWriter.getInstance(doc, new FileOutputStream(archivo));
+		doc.open();
+		doc.add(new Paragraph("REPORTE PAISES POR SEDE ANFITRIONA", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+		doc.add(new Paragraph(" "));
+		PdfPTable tabla = new PdfPTable(3);
+		tabla.setWidthPercentage(100);
+		for (String h : new String[]{"Pais Anfitrion", "Equipo Local", "Equipo Visitante"}) {
+			PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+			cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+			tabla.addCell(cell);
+		}
+		String sql = "SELECT p.nombre as pais, el.nombre as local, ev.nombre as visitante "
+			+ "FROM Partido pt "
+			+ "JOIN Estadio est ON pt.id_estadio = est.id_estadio "
+			+ "JOIN Ciudad c ON est.id_ciudad = c.id_ciudad "
+			+ "JOIN Pais p ON c.id_pais = p.id_pais "
+			+ "JOIN Equipo el ON pt.id_equipo_local = el.id_equipo "
+			+ "JOIN Equipo ev ON pt.id_equipo_visitante = ev.id_equipo "
+			+ "WHERE p.nombre IN ('Mexico', 'Estados Unidos', 'Canada') "
+			+ "ORDER BY p.nombre";
+		try (Connection conn = Conexion.getConexion();
+		     PreparedStatement ps = conn.prepareStatement(sql);
+		     ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				tabla.addCell(rs.getString("pais"));
+				tabla.addCell(rs.getString("local"));
+				tabla.addCell(rs.getString("visitante"));
+			}
+		}
+		doc.add(tabla);
+		doc.close();
+		mostrarInfo("Exito", "Reporte guardado en: " + archivo.getPath());
+	}
+
+	// ========== CERRAR SESION ==========
 	@FXML
 	void cerrarSesion(ActionEvent event) {
 		try {
@@ -653,4 +1604,16 @@ public class AdministradorController {
 		alert.showAndWait();
 	}
 
+
+    private String generarNombreUnico(String nombreBase) {
+        File carpeta = new File(System.getProperty("user.home"), "Downloads");
+        String nombre = nombreBase.replace(".pdf", "");
+        File archivo = new File(carpeta, nombreBase);
+        int i = 1;
+        while (archivo.exists()) {
+            archivo = new File(carpeta, nombre + "_" + i + ".pdf");
+            i++;
+        }
+        return archivo.getName();
+    }
 }

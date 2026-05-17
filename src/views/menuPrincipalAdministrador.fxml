@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<!-- Pantalla principal del Mundial 2026 -->
+
+<AnchorPane fx:id="root" prefHeight="650.0" prefWidth="800.0"
+	styleClass="root-pane"
+	stylesheets="@styles/menuPrincipalAdministrador.css"
+	xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="controllers.MenuPrincipalAdministradorController">
+	<children>
+		<BorderPane prefHeight="650.0" prefWidth="800.0"
+			stylesheets="@styles/menuPrincipalAdministrador.css">
+
+			<!-- ========== MENÚ LATERAL IZQUIERDO ========== -->
+			<left>
+				<AnchorPane prefHeight="650.0" prefWidth="180.0"
+					styleClass="sidebar" BorderPane.alignment="CENTER">
+					<children>
+						<!-- GridPane que organiza todas las filas del menú -->
+						<GridPane layoutX="8.0" layoutY="18.0" prefHeight="566.0"
+							prefWidth="180.0">
+							<columnConstraints>
+								<ColumnConstraints hgrow="SOMETIMES"
+									prefWidth="180.0" />
+							</columnConstraints>
+
+							<rowConstraints>
+								<!-- Filas con alturas predefinidas para mantener la proporción -->
+								<RowConstraints prefHeight="80.0" /> <!-- Logo -->
+								<RowConstraints prefHeight="40.0" /> <!-- Título ADMINISTRACIÓN -->
+								<RowConstraints prefHeight="50.0" /> <!-- Botón Usuarios -->
+								<RowConstraints prefHeight="50.0" /> <!-- Botón Bitácora -->
+								<RowConstraints prefHeight="40.0" /> <!-- Título GESTIÓN DE DATOS -->
+								<RowConstraints prefHeight="50.0" /> <!-- Botón Equipos -->
+								<RowConstraints prefHeight="50.0" />
+								<RowConstraints minHeight="10.0"
+									prefHeight="50.0" /> <!-- Botón Jugadores -->
+								<RowConstraints prefHeight="40.0" /> <!-- Título CONSULTAS Y REPORTES -->
+								<RowConstraints prefHeight="50.0" /> <!-- Botón Consultas -->
+								<RowConstraints prefHeight="50.0" /> <!-- Botón Reportes -->
+								<RowConstraints prefHeight="70.0" /> <!-- Cerrar sesión -->
+							</rowConstraints>
+
+							<children>
+								<!-- FILA 0: Logo y título "Mundial 2026" -->
+								<AnchorPane GridPane.rowIndex="0">
+									<children>
+										<ImageView fitHeight="87.0" fitWidth="88.0"
+											layoutX="46.0" layoutY="-25.0" preserveRatio="true">
+											<image>
+												<Image url="@icon/jugadorFutbol.png" />
+											</image>
+										</ImageView>
+										<Text layoutX="45.0" layoutY="56.0"
+									styleClass="sidebar-title" text="CAMPEONATO MUNDIAL" />									</children>
+								</AnchorPane>
+								<Button fx:id="btnUsuario" onAction="#mostrarVentana"
+									prefHeight="45.0" prefWidth="180.0" styleClass="menu-button"
+									text="Usuarios" GridPane.rowIndex="2">
+									<graphic>
+										<ImageView fitHeight="26" preserveRatio="true">
+											<image>
+												<Image url="@icon/usuarios.png" />
+											</image>
+										</ImageView>
+									</graphic>
+								</Button>
+
+								<!-- FILA 3: Botón Bitácora -->
+								<Button fx:id="btnBitacora" onAction="#mostrarVentana"
+									prefHeight="45.0" prefWidth="180.0" styleClass="menu-button"
+									text="Bitácora" GridPane.rowIndex="3">
+									<graphic>
+										<ImageView fitHeight="26" preserveRatio="true">
+											<image>
+												<Image url="@icon/bitacora.png" />
+											</image>
+										</ImageView>
+									</graphic>
+								</Button>
+
+								<!-- FILA 4: Sección GESTIÓN DE DATOS -->
+								<Text styleClass="sidebar-section" text="GESTIÓN DE DATOS"
+									GridPane.rowIndex="4" />
+
+								<!-- FILA 5: Botón Equipos -->
+								<Button fx:id="btnEquipos" onAction="#mostrarVentana"
+									prefHeight="45.0" prefWidth="180.0" styleClass="menu-button"
+									text="Equipos" GridPane.rowIndex="5">
+									<graphic>
+										<ImageView fitHeight="26" preserveRatio="true">
+											<image>
+												<Image url="@icon/equipos.png" />
+											</image>
+										</ImageView>
+									</graphic>
+								</Button>
+
+								<!-- FILA 6: Botón Jugadores -->
+								<Button fx:id="btnJugadores" onAction="#mostrarVentana"
+									prefHeight="45.0" prefWidth="180.0" styleClass="menu-button"
+									text="Jugadores" GridPane.rowIndex="6">
+									<graphic>
+										<ImageView fitHeight="26" preserveRatio="true">
+											<image>
+												<Image url="@icon/jugadores.png" />
+											</image>
+										</ImageView>
+									</graphic>
+								</Button>
+								<Button fx:id="btnPartidos" onAction="#mostrarVentana"
+									prefHeight="45.0" prefWidth="180.0" styleClass="menu-button"
+									text="Partidos" GridPane.rowIndex="7">
+									<graphic>
+										<ImageView fitHeight="26" preserveRatio="true">
+											<image>
+												<Image url="@icon/partidos.png" />
+											</image>
+										</ImageView>
+									</graphic>
+								</Button>
+
+								<!-- FILA 7: Sección CONSULTAS Y REPORTES -->
+								<Text styleClass="sidebar-section"
+									text="CONSULTAS Y REPORTES" GridPane.rowIndex="8" />
+
+								<!-- FILA 8: Botón Consultas -->
+								<Button fx:id="btnConsultas" onAction="#mostrarVentana"
+									prefHeight="45.0" prefWidth="180.0" styleClass="menu-button"
+									text="Consultas" GridPane.rowIndex="9">
+									<graphic>
+										<ImageView fitHeight="26" preserveRatio="true">
+											<image>
+												<Image url="@icon/barras.png" />
+											</image>
+										</ImageView>
+									</graphic>
+								</Button>
+
+								<!-- FILA 9: Botón Reportes -->
+								<Button fx:id="btnReportes" onAction="#mostrarVentana"
+									prefHeight="45.0" prefWidth="180.0" styleClass="menu-button"
+									text="Reportes" GridPane.rowIndex="10">
+									<graphic>
+										<ImageView fitHeight="26" preserveRatio="true">
+											<image>
+												<Image url="@icon/reportes.png" />
+											</image>
+										</ImageView>
+									</graphic>
+								</Button>
+
+								<!-- FILA 10: Cerrar sesión -->
+								<AnchorPane GridPane.rowIndex="11">
+									<children>
+										<Separator layoutY="5" prefWidth="180" />
+										<Button fx:id="btnCerrarSesion" layoutY="15.0"
+											onAction="#cerrarSesion" prefHeight="45.0" prefWidth="180.0"
+											styleClass="logout-button"
+											stylesheets="@styles/menuPrincipalAdministrador.css"
+											text="Cerrar Sesión">
+											<graphic>
+												<ImageView fitHeight="26" preserveRatio="true">
+													<image>
+														<Image url="@icon/cerrarSesion.png" />
+													</image>
+												</ImageView>
+											</graphic>
+										</Button>
+									</children>
+								</AnchorPane>
+							</children>
+						</GridPane>
+					</children>
+				</AnchorPane>
+			</left>
+
+			<!-- ========== ÁREA CENTRAL ========== -->
+			<center>
+				<StackPane fx:id="contentPane" prefHeight="616.0" prefWidth="611.0"
+					styleClass="content-area">
+					<AnchorPane fx:id="inicioPane" layoutX="-1.0"
+						layoutY="-1.0" prefHeight="605.0" prefWidth="670.0" visible="false">
+							<children>
+								<AnchorPane layoutX="-8.0" layoutY="2.0"
+									prefHeight="602.0" prefWidth="679.0">
+									<children>
+										<GridPane layoutX="124.0" layoutY="36.0"
+											prefHeight="54.0" prefWidth="382.0">
+											<columnConstraints>
+												<ColumnConstraints hgrow="SOMETIMES"
+													maxWidth="323.6000518798828" minWidth="10.0"
+													prefWidth="109.3999755859375" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													maxWidth="367.19996337890626" minWidth="0.0"
+													prefWidth="272.6000244140625" />
+											</columnConstraints>
+											<rowConstraints>
+												<RowConstraints minHeight="10.0"
+													prefHeight="30.0" vgrow="SOMETIMES" />
+											</rowConstraints>
+											<children>
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													text="Bienvenido," wrappingWidth="109.65780639648438">
+													<font>
+														<Font name="System Bold" size="36.0" />
+													</font>
+												</Text>
+												<Text fx:id="textUsuarioBienvenido" strokeType="OUTSIDE"
+													strokeWidth="0.0" text="usuario"
+													wrappingWidth="118.88867568969727" GridPane.columnIndex="1" />
+											</children>
+										</GridPane>
+										<ImageView fitHeight="292.0" fitWidth="312.0"
+											layoutX="191.0" layoutY="111.0" pickOnBounds="true"
+											preserveRatio="true">
+											<image>
+												<Image url="@icon/campeanto.png" />
+											</image>
+										</ImageView>
+										<GridPane layoutX="60.0" layoutY="462.0"
+											prefHeight="50.0" prefWidth="574.0">
+											<columnConstraints>
+												<ColumnConstraints hgrow="SOMETIMES"
+													maxWidth="139.20001220703125" minWidth="10.0"
+													prefWidth="73.80001220703124" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													maxWidth="286.40002059936523" minWidth="10.0"
+													prefWidth="140.39998779296874" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													maxWidth="330.19996643066406" minWidth="10.0"
+													prefWidth="66.99996337890624" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													maxWidth="330.19996643066406" minWidth="10.0"
+													prefWidth="141.6000244140625" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													maxWidth="360.8000030517578" minWidth="0.0"
+													prefWidth="59.19997558593752" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													maxWidth="360.8000030517578" minWidth="10.0"
+													prefWidth="95.99995117187495" />
+											</columnConstraints>
+											<rowConstraints>
+												<RowConstraints minHeight="10.0"
+													prefHeight="30.0" vgrow="SOMETIMES" />
+											</rowConstraints>
+											<children>
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													text="Usuario:" />
+												<Text fx:id="textUsuarioInfo" strokeType="OUTSIDE"
+													strokeWidth="0.0" text="usuario" GridPane.columnIndex="1" />
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													text="Fecha:" GridPane.columnIndex="2" />
+												<Text fx:id="textfecha" strokeType="OUTSIDE"
+													strokeWidth="0.0" text="fecha" GridPane.columnIndex="3" />
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													text="Hora:" GridPane.columnIndex="4" />
+												<Text fx:id="textHora" strokeType="OUTSIDE"
+													strokeWidth="0.0" text="hora" GridPane.columnIndex="5" />
+											</children>
+										</GridPane>
+									</children>
+								</AnchorPane>
+							</children>
+						</AnchorPane>
+						<AnchorPane fx:id="admUsuariosPane" layoutX="-1.0"
+							prefHeight="601.0" prefWidth="656.0" visible="false">
+							<children>
+								<AnchorPane layoutY="-4.0" prefHeight="604.0"
+									prefWidth="656.0">
+									<children>
+										<!-- Título con nuevo estilo -->
+										<Text layoutX="172.0" layoutY="53.0" strokeType="OUTSIDE"
+											strokeWidth="0.0" styleClass="section-title"
+											text="GESTIÓN DE USUARIOS" wrappingWidth="240.79998779296875" />
+										<Separator layoutX="110.0" layoutY="62.0"
+											prefHeight="6.0" prefWidth="350.0" />
+
+										<!-- Formulario mejorado -->
+										<GridPane layoutX="94.0" layoutY="80.0"
+											prefHeight="110.0" prefWidth="380.0" vgap="8">
+											<columnConstraints>
+												<ColumnConstraints halignment="RIGHT"
+													hgrow="SOMETIMES" maxWidth="174.8" minWidth="10.0"
+													prefWidth="129.0000244140625" />
+												<ColumnConstraints halignment="RIGHT"
+													hgrow="SOMETIMES" maxWidth="130.199951171875"
+													minWidth="0.0" prefWidth="5.399987792968744" />
+												<ColumnConstraints hgrow="ALWAYS"
+													maxWidth="272.8000122070313" minWidth="10.0"
+													prefWidth="250.80001220703122" />
+											</columnConstraints>
+											<rowConstraints>
+												<RowConstraints minHeight="34.0"
+													prefHeight="34.0" vgrow="SOMETIMES" />
+												<RowConstraints minHeight="34.0"
+													prefHeight="34.0" vgrow="SOMETIMES" />
+												<RowConstraints minHeight="34.0"
+													prefHeight="34.0" vgrow="SOMETIMES" />
+											</rowConstraints>
+											<children>
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													styleClass="form-label" text="Usuario:"
+													GridPane.halignment="RIGHT" />
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													styleClass="form-label" text="Contraseña:"
+													GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													styleClass="form-label" text="Rol:"
+													GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+												<TextField fx:id="textAdmUsuario"
+													prefHeight="32.0" prefWidth="261.0"
+													promptText="Ingrese usuario" styleClass="text-field"
+													GridPane.columnIndex="2" />
+												<PasswordField fx:id="textAdmContrasena"
+													prefHeight="30.0" prefWidth="260.0"
+													promptText="Ingrese contraseña" styleClass="password-field"
+													GridPane.columnIndex="2" GridPane.rowIndex="1" />
+												<ComboBox fx:id="comboAdmRol" prefHeight="30.0"
+													prefWidth="160.0" styleClass="combo-box"
+													GridPane.columnIndex="2" GridPane.rowIndex="2" />
+											</children>
+										</GridPane>
+
+										<!-- Botones Agregar y Actualizar -->
+										<GridPane hgap="16" layoutX="71.0" layoutY="221.0"
+											prefHeight="40.0" prefWidth="442.0">
+											<columnConstraints>
+												<ColumnConstraints hgrow="SOMETIMES"
+													prefWidth="142.0" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													prefWidth="142.0" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													minWidth="10.0" prefWidth="142.0" />
+											</columnConstraints>
+											<rowConstraints>
+												<RowConstraints minHeight="10.0"
+													prefHeight="40.0" vgrow="SOMETIMES" />
+											</rowConstraints>
+											<children>
+												<Button fx:id="btnAdmAgragar" mnemonicParsing="false"
+													onAction="#AdmAgragar" prefHeight="40.0" prefWidth="130.0"
+													styleClass="action-button, add" text="＋  Agregar" />
+												<Button fx:id="btnAdmActualizar"
+													mnemonicParsing="false" onAction="#AdmActualizar"
+													prefHeight="40.0" prefWidth="130.0"
+													styleClass="action-button, update" text="✎  Actualizar"
+													GridPane.columnIndex="1" />
+												<Button fx:id="btnAdmGUBuscar"
+													mnemonicParsing="false" onAction="#AdmGUBuscar"
+													prefHeight="40.0" prefWidth="138.0"
+													styleClass="action-button, add" text="🔍  Buscar"
+													GridPane.columnIndex="2" />
+											</children>
+										</GridPane>
+
+										<Separator layoutX="110.0" layoutY="274.0"
+											prefHeight="6.0" prefWidth="350.0" />
+
+										<!-- Tabla mejorada -->
+										<TableView fx:id="tabAdmGU" layoutX="77.0"
+											layoutY="292.0" prefHeight="210.0" prefWidth="420.0"
+											styleClass="table-view">
+											<columns>
+												<TableColumn fx:id="colIDAdmGU" prefWidth="70.0"
+													text="ID" />
+												<TableColumn fx:id="colUsuarioAdmGU"
+													prefWidth="230.0" text="Usuario" />
+												<TableColumn fx:id="colRolAdmGU"
+													prefWidth="118.0" text="Rol" />
+											</columns>
+										</TableView>
+
+										<!-- Botón Eliminar centrado -->
+										<Button fx:id="btnAdmEliminar" layoutX="227.0"
+											layoutY="514.0" mnemonicParsing="false"
+											onAction="#AdmEliminar" prefHeight="40.0" prefWidth="130.0"
+											styleClass="action-button, delete" text="✕  Eliminar" />
+									</children>
+								</AnchorPane>
+							</children>
+						</AnchorPane>
+						<AnchorPane fx:id="admBitacoraPane" layoutX="-1.0"
+							prefHeight="602.0" prefWidth="659.0" visible="false">
+							<children>
+								<AnchorPane layoutY="1.0" prefHeight="604.0"
+									prefWidth="662.0">
+									<children>
+
+										<!-- Título principal -->
+										<Text layoutX="206.0" layoutY="59.0" strokeType="OUTSIDE"
+											strokeWidth="0.0" styleClass="section-title"
+											text="BITÁCORA DE ACCESOS" wrappingWidth="280.0" />
+										<Separator layoutX="160.0" layoutY="84.0"
+											prefHeight="6.0" prefWidth="366.0" />
+
+										<!-- Fila de búsqueda por fecha -->
+										<GridPane hgap="12" layoutX="72.0" layoutY="104.0"
+											prefHeight="40.0" prefWidth="490.0">
+											<columnConstraints>
+												<ColumnConstraints halignment="RIGHT"
+													hgrow="NEVER" maxWidth="161.0000244140625"
+													minWidth="144.20003662109374"
+													prefWidth="144.20003662109374" />
+												<ColumnConstraints hgrow="ALWAYS"
+													maxWidth="205.79996337890626" minWidth="188.9999755859375"
+													prefWidth="205.79996337890626" />
+												<ColumnConstraints hgrow="NEVER"
+													prefWidth="120.0" />
+											</columnConstraints>
+											<rowConstraints>
+												<RowConstraints minHeight="36.0"
+													prefHeight="36.0" vgrow="SOMETIMES" />
+											</rowConstraints>
+											<children>
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													styleClass="form-label" text="Fecha de Consulta:"
+													GridPane.halignment="RIGHT" />
+												<DatePicker fx:id="DateAdmBitacora"
+													prefHeight="32.0" prefWidth="210.0"
+													styleClass="date-picker" GridPane.columnIndex="1" />
+												<Button fx:id="btnAdmBitacoraBuscar"
+													mnemonicParsing="false" onAction="#AdmBitacoraBuscar"
+													prefHeight="34.0" prefWidth="116.0"
+													styleClass="action-button, add" text="🔍  Buscar"
+													GridPane.columnIndex="2" />
+											</children>
+										</GridPane>
+
+										<Separator layoutX="160.0" layoutY="163.0"
+											prefHeight="6.0" prefWidth="366.0" />
+
+										<!-- Subtítulo Resultados -->
+										<Text layoutX="72.0" layoutY="199.0" strokeType="OUTSIDE"
+											strokeWidth="0.0" styleClass="panel-title" text="Resultados" />
+
+										<!-- Tabla de bitácora -->
+										<TableView fx:id="tabAdmBitacora" layoutX="52.0"
+											layoutY="211.0" prefHeight="310.0" prefWidth="558.0"
+											styleClass="table-view">
+											<columns>
+												<TableColumn fx:id="colIDAdmBitacora"
+													prefWidth="65.0" text="ID" />
+												<TableColumn fx:id="colUsuarioAdmBitacora"
+													prefWidth="155.0" text="Usuario" />
+												<TableColumn fx:id="colFechaIngresoAdmBitacora"
+													prefWidth="169.0" text="Fecha/Hora Ingreso" />
+												<TableColumn fx:id="colFechaSalidaAdmBitacora"
+													prefWidth="169.0" text="Fecha/Hora Salida" />
+											</columns>
+										</TableView>
+
+										<!-- Botón Exportar centrado -->
+										<Button fx:id="btnAdmBitacoraExportar" layoutX="250.0"
+											layoutY="541.0" mnemonicParsing="false"
+											onAction="#AdmBitacoraExportar" prefHeight="37.0"
+											prefWidth="162.0" styleClass="action-button, update"
+											text="📄  Exportar a PDF" />
+									</children>
+								</AnchorPane>
+
+							</children>
+						</AnchorPane>
+						<AnchorPane fx:id="admEquiposPane"
+							prefHeight="600.0" prefWidth="658.0" visible="false">
+							<children>
+								<AnchorPane layoutX="-2.0" minHeight="0.0"
+									minWidth="0.0" prefHeight="606.0" prefWidth="662.0">
+									<children>
+										<Text layoutX="204.0" layoutY="57.0" strokeType="OUTSIDE"
+											strokeWidth="0.0" styleClass="section-title"
+											text="GESTIÓN DE EQUIPOS" wrappingWidth="228.800048828125" />
+										<Separator layoutX="134.0" layoutY="72.0"
+											prefHeight="6.0" prefWidth="366.0" />
+										<GridPane hgap="12" layoutX="84.0" layoutY="96.0"
+											prefHeight="108.0" prefWidth="363.0">
+											<columnConstraints>
+												<ColumnConstraints halignment="RIGHT"
+													hgrow="NEVER" prefWidth="145.0" />
+												<ColumnConstraints hgrow="ALWAYS"
+													prefWidth="210.0" />
+											</columnConstraints>
+											<rowConstraints>
+												<RowConstraints minHeight="36.0"
+													prefHeight="36.0" vgrow="SOMETIMES" />
+												<RowConstraints minHeight="36.0"
+													prefHeight="36.0" vgrow="SOMETIMES" />
+												<RowConstraints minHeight="36.0"
+													prefHeight="36.0" vgrow="SOMETIMES" />
+											</rowConstraints>
+											<children>
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													styleClass="form-label" text="País/Equipos :"
+													GridPane.halignment="RIGHT" />
+												<TextField fx:id="textAdmEquipoPais"
+													prefHeight="32.0" prefWidth="261.0" styleClass="text-field"
+													GridPane.columnIndex="1" />
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													styleClass="form-label" text="Director técnico :"
+													GridPane.rowIndex="1" />
+												<ComboBox fx:id="comboAdmEquipoConfederacion"
+													prefHeight="30.0" prefWidth="160.0" styleClass="combo-box"
+													GridPane.columnIndex="1" GridPane.rowIndex="2" />
+												<Text strokeType="OUTSIDE" strokeWidth="0.0"
+													styleClass="form-label" text="Confederación :"
+													GridPane.rowIndex="2" />
+												<TextField fx:id="textAdmEquipoDirectorTecnico"
+													prefHeight="32.0" prefWidth="158.0" styleClass="text-field"
+													GridPane.columnIndex="1" GridPane.rowIndex="1" />
+											</children>
+										</GridPane>
+										<Separator layoutX="135.0" layoutY="289.0"
+											prefHeight="6.0" prefWidth="366.0" />
+										<GridPane hgap="16" layoutX="123.0" layoutY="239.0"
+											prefHeight="40.0" prefWidth="455.0">
+											<columnConstraints>
+												<ColumnConstraints hgrow="SOMETIMES"
+													prefWidth="142.0" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													minWidth="10.0" prefWidth="142.0" />
+												<ColumnConstraints hgrow="SOMETIMES"
+													prefWidth="142.0" />
+											</columnConstraints>
+											<rowConstraints>
+												<RowConstraints minHeight="10.0"
+													prefHeight="40.0" vgrow="SOMETIMES" />
+											</rowConstraints>
+											<children>
+												<Button fx:id="btnAdmEquiposAgregar"
+													mnemonicParsing="false" onAction="#AdmEquiposAgregar"
+													prefHeight="40.0" prefWidth="130.0"
+													styleClass="action-button, add" text="＋  Agregar" />
+												<Button fx:id="btnAdmEquiposActualizar"
+													mnemonicParsing="false" onAction="#AdmEquiposActualizar"
+													prefHeight="40.0" prefWidth="130.0"
+													styleClass="action-button, update" text="✎  Actualizar"
+													GridPane.columnIndex="1" />
+												<Button fx:id="btnAdmEquiposBuscar"
+													mnemonicParsing="false" onAction="#AdmEquiposBuscar"
+													prefHeight="40.0" prefWidth="138.0"
+													styleClass="action-button, add" text="🔍  Buscar"
+													GridPane.columnIndex="2" />
+											</children>
+										</GridPane>
+										<TableView fx:id="tabAdmGE" layoutX="84.0"
+											layoutY="310.0" prefHeight="221.0" prefWidth="509.0"
+											styleClass="table-view">
+											<columns>
+												<TableColumn fx:id="colIDAdmGE"
+													prefWidth="59.199951171875" text="ID" />
+												<TableColumn fx:id="colEquiposAdmGE"
+													prefWidth="136.80006408691406" text="Equipos" />
+												<TableColumn fx:id="colDirectorTecnicoAdmGE"
+													prefWidth="165.5999755859375" text="Director Técnico" />
+												<TableColumn fx:id="colConfederacionAdmGE"
+													prefWidth="143.99993896484375" text="Confederación" />
+											</columns>
+										</TableView>
+										<Button fx:id="btnAdmEquiposEliminar" layoutX="273.0"
+											layoutY="541.0" mnemonicParsing="false"
+											onAction="#AdmEquiposEliminar" prefHeight="40.0"
+											prefWidth="130.0" styleClass="action-button, delete"
+											text="✕  Eliminar" />
+									</children>
+								</AnchorPane>
+							</children>
+						</AnchorPane>
+						<AnchorPane fx:id="admJugadoresPane"
+							prefHeight="606.0" prefWidth="663.0" visible="false">
+							<children>
+								<!-- Pendiente de implementar contenido -->
+								<AnchorPane prefHeight="606.0" prefWidth="665.0" />
+							</children>
+						</AnchorPane>
+					<AnchorPane fx:id="consultasPane" prefHeight="606.0" prefWidth="663.0" visible="false">
+						<fx:define><ToggleGroup fx:id="tgConsultas" /></fx:define>
+						<children>
+							<Text layoutX="184.0" layoutY="37.0" styleClass="section-title" strokeType="OUTSIDE" strokeWidth="0.0" text="CONSULTAS DEL MUNDIAL" wrappingWidth="312.0" />
+							<Text layoutX="50.0" layoutY="85.0" styleClass="form-label" text="Seleccione la consulta a ejecutar:" />
+							<RadioButton fx:id="rdoConsulta1" layoutX="50.0" layoutY="115.0" text="1. Jugador mas costoso por confederacion." toggleGroup="$tgConsultas" />
+							<RadioButton fx:id="rdoConsulta2" layoutX="50.0" layoutY="150.0" text="2. Partidos en un estadio especifico." toggleGroup="$tgConsultas" />
+							<RadioButton fx:id="rdoConsulta3" layoutX="50.0" layoutY="185.0" text="3. Equipo mas costoso por pais anfitrion." toggleGroup="$tgConsultas" />
+							<RadioButton fx:id="rdoConsulta4" layoutX="50.0" layoutY="220.0" text="4. Cantidad de jugadores menores de X anos por equipo." toggleGroup="$tgConsultas" />
+							<TextField fx:id="textParametroBusqueda" layoutX="50.0" layoutY="265.0" prefHeight="32.0" prefWidth="300.0" promptText="Parametro" styleClass="text-field" visible="false" />
+							<ComboBox fx:id="combSeleccioneEstadio" layoutX="370.0" layoutY="265.0" prefHeight="32.0" prefWidth="200.0" promptText="Estadio" visible="false" />
+							<Button layoutX="50.0" layoutY="315.0" mnemonicParsing="false" onAction="#ejecutarConsultas" prefHeight="40.0" prefWidth="150.0" styleClass="action-button, add" text="Ejecutar" />
+							<Text layoutX="50.0" layoutY="376.0" styleClass="form-label" strokeType="OUTSIDE" strokeWidth="0.0" text="Resultados" />
+							<TableView fx:id="tabConsultas" layoutX="33.0" layoutY="383.0" prefHeight="210.0" prefWidth="609.0" styleClass="table-view" />
+						</children>
+					</AnchorPane>
+					<AnchorPane fx:id="reportesPane" prefHeight="606.0" prefWidth="663.0" visible="false">
+						<fx:define><ToggleGroup fx:id="tgReportes" /></fx:define>
+						<children>
+							<Text layoutX="184.0" layoutY="37.0" styleClass="section-title" strokeType="OUTSIDE" strokeWidth="0.0" text="REPORTES DEL MUNDIAL" wrappingWidth="312.0" />
+							<Text layoutX="50.0" layoutY="85.0" styleClass="form-label" text="Seleccione el reporte a generar:" />
+							<RadioButton fx:id="rdoReporte1" layoutX="50.0" layoutY="115.0" text="1. Usuarios que ingresaron/salieron en una fecha." toggleGroup="$tgReportes" />
+							<RadioButton fx:id="rdoReporte2" layoutX="50.0" layoutY="150.0" text="2. Jugadores por peso, estatura y equipo." toggleGroup="$tgReportes" />
+							<RadioButton fx:id="rdoReporte3" layoutX="50.0" layoutY="185.0" text="3. Valor total de jugadores por equipo y confederacion." toggleGroup="$tgReportes" />
+							<RadioButton fx:id="rdoReporte4" layoutX="50.0" layoutY="220.0" text="4. Paises que juegan en cada pais anfitrion." toggleGroup="$tgReportes" />
+							<DatePicker fx:id="dateReporte" layoutX="50.0" layoutY="265.0" prefHeight="32.0" prefWidth="200.0" promptText="Fecha reporte 1" visible="false" />
+							<TextField fx:id="textPesoReporte" layoutX="270.0" layoutY="265.0" prefHeight="32.0" prefWidth="120.0" promptText="Peso max" styleClass="text-field" visible="false" />
+							<TextField fx:id="textEstaturaReporte" layoutX="410.0" layoutY="265.0" prefHeight="32.0" prefWidth="120.0" promptText="Estatura max" styleClass="text-field" visible="false" />
+							<ComboBox fx:id="comboEquipoReporte" layoutX="50.0" layoutY="310.0" prefHeight="32.0" prefWidth="200.0" promptText="Equipo" visible="false" />
+							<ComboBox fx:id="comboConfederacionReporte" layoutX="270.0" layoutY="310.0" prefHeight="32.0" prefWidth="200.0" promptText="Confederacion" visible="false" />
+							<Button layoutX="50.0" layoutY="360.0" mnemonicParsing="false" onAction="#generarReporte" prefHeight="40.0" prefWidth="200.0" styleClass="action-button, add" text="Generar PDF" />
+						</children>
+					</AnchorPane>
+				</StackPane>
+			</center>
+		</BorderPane>
+	</children>
+</AnchorPane>

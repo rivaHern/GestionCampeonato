@@ -12,6 +12,14 @@ public class Conexion {
         try {
             Properties props = new Properties();
             InputStream input = Conexion.class.getResourceAsStream("db.properties");
+            
+            if (input == null) {
+                System.out.println("❌ No se encontró db.properties en el classpath.");
+                System.out.println("   Búsqueda: " + Conexion.class.getPackage().getName() + "/db.properties");
+                System.out.println("   Verifica que bin/application/db.properties exista.");
+                return null;
+            }
+            
             props.load(input);
 
             String server = props.getProperty("db.server");
