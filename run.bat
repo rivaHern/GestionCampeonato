@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 REM ============================================================
 REM GestionCampeonato - Script de ejecución para Windows
 REM ============================================================
@@ -25,6 +26,7 @@ for %%p in (
     "%USERPROFILE%\javafx-sdk-17.0.13\lib"
     "%USERPROFILE%\javafx-sdk-17\lib"
     "C:\Program Files\JavaFX\lib"
+    "C:\Program Files\Java\javafx-sdk-21.0.3\lib"
 ) do (
     if exist "%%~p\javafx.controls.jar" (
         set JAVAFX_PATH=%%~p
@@ -48,7 +50,7 @@ set LIBS=lib\mssql-jdbc.jar;lib\itextpdf-5.5.13.3.jar
 
 REM Compilar
 echo Compilando...
-dir /s /b src\*.java > sources.txt
+powershell -Command "Get-ChildItem -Path src -Filter *.java -Recurse | ForEach-Object { '\"' + ($_.FullName -replace '\\', '/') + '\"' } | Out-File -FilePath sources.txt -Encoding ascii"
 javac --module-path "%JAVAFX_PATH%" ^
       --add-modules javafx.controls,javafx.fxml ^
       -cp "%LIBS%" ^

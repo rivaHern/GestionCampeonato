@@ -134,3 +134,27 @@ INSERT INTO Usuario (username, password, rol, activo) VALUES
 ('valen', '123', 'TRADICIONAL', 1),
 ('esporadico', 'esporadico', 'ESPORADICO', 1);
 GO
+
+-- Paises de prueba
+INSERT INTO Pais (nombre, id_confederacion) VALUES
+('Colombia', 2), -- CONMEBOL
+('México', 3),   -- CONCACAF
+('España', 1),   -- UEFA
+('Estados Unidos', 3); -- CONCACAF
+GO
+
+-- Ciudades de prueba
+INSERT INTO Ciudad (nombre, id_pais, es_sede) VALUES
+('Bogotá', 1, 0),
+('Ciudad de México', 2, 1),
+('Madrid', 3, 0),
+('Miami', 4, 1);
+GO
+
+-- Estadios de prueba
+INSERT INTO Estadio (nombre, capacidad, id_ciudad) VALUES
+('Estadio Ciudad de México', 87000, 2),
+('Estadio Guadalajara', 48000, 2),
+('Miami Stadium', 65000, 4);
+GO
+

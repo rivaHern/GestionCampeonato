@@ -23,11 +23,12 @@ public class Conexion {
             props.load(input);
 
             String server = props.getProperty("db.server");
+            String port = props.getProperty("db.port", "1433");
             String database = props.getProperty("db.name");
             String user = props.getProperty("db.user");
             String password = props.getProperty("db.password");
 
-            String url = "jdbc:sqlserver://" + server + ":1433;"
+            String url = "jdbc:sqlserver://" + server + ":" + port + ";"
                     + "databaseName=" + database + ";"
                     + "user=" + user + ";"
                     + "password=" + password + ";"
