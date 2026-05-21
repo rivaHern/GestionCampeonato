@@ -29,11 +29,21 @@ db.password=Mundial2026#
 ```
 
 ### 3. Correr la aplicación
-En Windows, simplemente haz doble clic en el archivo `run.bat` o ejecútalo en la consola:
-```cmd
-.\run.bat
-```
-*(El script detectará automáticamente tu instalación de Java y JavaFX, compilará el código fuente y abrirá la ventana de inicio de sesión).*
+Dependiendo de tu sistema operativo, ejecuta uno de los siguientes archivos para compilar y arrancar la aplicación automáticamente:
+
+- **En Windows:**
+  Haz doble clic en el archivo `run.bat` o ejecútalo desde la consola:
+  ```cmd
+  .\run.bat
+  ```
+
+- **En Linux o macOS:**
+  Abre una terminal y ejecuta el script de shell:
+  ```bash
+  ./run.sh
+  ```
+
+*(Estos scripts detectarán automáticamente tu instalación de Java y JavaFX, compilarán el código fuente y abrirán la ventana de inicio de sesión).*
 
 ## Usuarios de prueba
 - **Administrador:** `admin` / `Admin123!` -> Acceso total, creación de usuarios y vista de bitácora.

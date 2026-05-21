@@ -1,147 +1,260 @@
 USE MundialFutbol2026;
 GO
 
--- =============================================
--- EQUIPOS
--- =============================================
-INSERT INTO Equipo (codigo, nombre, confederacion, puntos_fifa) VALUES
-('E01', 'Canadá (anfitrión)', 'CONCACAF', 1791),
-('E02', 'Estados Unidos (anfitrión)', 'CONCACAF', 1723),
-('E03', 'México (anfitrión)', 'CONCACAF', 1845),
-('E04', 'Japón', 'AFC', 1878),
-('E05', 'Irán', 'AFC', 1754),
-('E06', 'Uzbekistán', 'AFC', 1734),
-('E07', 'Corea del Sur', 'AFC', 1783),
-('E08', 'Jordania', 'AFC', 1608),
-('E09', 'Australia', 'OFC', 1780),
-('E10', 'Argentina', 'CONMEBOL', 2113),
-('E11', 'Ecuador', 'CONMEBOL', 1929),
-('E12', 'Brasil', 'CONMEBOL', 1978),
-('E13', 'Nueva Zelandia', 'OFC', 1590),
-('E14', 'Marruecos', 'CAF', 1828),
-('E15', 'Túnez', 'CAF', 1650),
-('E16', 'Colombia', 'CONMEBOL', 1991),
-('E17', 'Paraguay', 'CONMEBOL', 1821),
-('E18', 'Uruguay', 'CONMEBOL', 1914),
-('E19', 'Egipto', 'CAF', 1644),
-('E20', 'Argelia', 'CAF', 1719),
-('E21', 'Ghana', 'CAF', 1510),
-('E22', 'Cabo Verde', 'CAF', 1561),
-('E23', 'Sudáfrica', 'CAF', 1532),
-('E24', 'Qatar', 'AFC', 1487),
-('E25', 'Inglaterra', 'UEFA', 2042),
-('E26', 'Costa de Marfil', 'CAF', 1607),
-('E27', 'Senegal', 'CAF', 1803),
-('E28', 'Arabia Saudita', 'AFC', 1578),
-('E29', 'Francia', 'UEFA', 2063),
-('E30', 'Portugal', 'UEFA', 1976),
-('E31', 'Noruega', 'UEFA', 1922),
-('E32', 'Croacia', 'UEFA', 1933),
-('E33', 'Alemania', 'UEFA', 1911),
-('E34', 'Países Bajos', 'UEFA', 1959),
-('E35', 'Suiza', 'UEFA', 1897),
-('E36', 'Escocia', 'UEFA', 1790),
-('E37', 'España', 'UEFA', 2172),
-('E38', 'Austria', 'UEFA', 1818),
-('E39', 'Bélgica', 'UEFA', 1849),
-('E40', 'Panamá', 'CONCACAF', 1738),
-('E41', 'Curazao', 'CONCACAF', 1457),
-('E42', 'Haití', 'CONCACAF', 1527);
+-- Limpiar tablas si hay algo (en orden de FKs)
+DELETE FROM Bitacora;
+DELETE FROM Partido;
+DELETE FROM GrupoEquipo;
+DELETE FROM Jugador;
+DELETE FROM DirectorTecnico;
+DELETE FROM Equipo;
+DELETE FROM Estadio;
+DELETE FROM Ciudad;
+DELETE FROM Pais;
+DELETE FROM Usuario;
+DELETE FROM Grupo;
+DELETE FROM Confederacion;
+GO
+
+-- Reiniciar autoincrementables
+DBCC CHECKIDENT ('Partido', RESEED, 0);
+DBCC CHECKIDENT ('Jugador', RESEED, 0);
+DBCC CHECKIDENT ('DirectorTecnico', RESEED, 0);
+DBCC CHECKIDENT ('Equipo', RESEED, 0);
+DBCC CHECKIDENT ('Estadio', RESEED, 0);
+DBCC CHECKIDENT ('Ciudad', RESEED, 0);
+DBCC CHECKIDENT ('Pais', RESEED, 0);
+DBCC CHECKIDENT ('Usuario', RESEED, 0);
+DBCC CHECKIDENT ('Confederacion', RESEED, 0);
+DBCC CHECKIDENT ('Grupo', RESEED, 0);
+DBCC CHECKIDENT ('Bitacora', RESEED, 0);
 GO
 
 -- =============================================
--- GRUPOS
+-- CONFIGURACIÓN BÁSICA (Usuarios, Grupos, Confederaciones)
 -- =============================================
+
+INSERT INTO Confederacion (nombre, siglas) VALUES
+('Union de Asociaciones de Futbol Europeas', 'UEFA'),
+('Confederacion Sudamericana de Futbol', 'CONMEBOL'),
+('Confederacion de Futbol de America del Norte', 'CONCACAF'),
+('Confederacion Africana de Futbol', 'CAF'),
+('Confederacion Asiatica de Futbol', 'AFC'),
+('Confederacion de Futbol de Oceania', 'OFC');
+GO
+
 INSERT INTO Grupo (nombre) VALUES
 ('A'),('B'),('C'),('D'),('E'),('F'),('G'),('H'),('I'),('J'),('K'),('L');
 GO
 
+INSERT INTO Usuario (username, password, rol, activo) VALUES
+('admin', 'Admin123!', 'ADMINISTRADOR', 1),
+('valen', '123', 'TRADICIONAL', 1),
+('esporadico', 'esporadico', 'ESPORADICO', 1);
+GO
+
 -- =============================================
--- PARTIDOS
+-- PAISES (48 Clasificados al Mundial)
 -- =============================================
-INSERT INTO Partido (grupo, fecha, hora, equipo_local, equipo_visita, goles_local, goles_visita, sede) VALUES
-('A', '2025-06-11', '21:00', 'Mexico', 'Sudafrica', 0, 1, 'Estadio Ciudad de México'),
-('A', '2025-06-11', '04:00', 'Corea del sur', 'repechaje europa D', 1, 1, 'Estadio Guadalajara'),
-('A', '2025-06-18', '18:00', 'Sudáfrica', 'repechaje europa D', 1, 0, 'Atlanta'),
-('A', '2025-06-19', '03:00', 'Mexico', 'Corea del sur', 2, 1, 'Zapopan'),
-('A', '2025-06-25', '03:00', 'Repechaje euro D', 'Mexico', 0, 1, 'Ciudad de México'),
-('A', '2026-06-25', '03:00', 'Sudáfrica', 'Corea del sur', 1, 1, 'Monterrey'),
-('A', '2026-06-01', '00:00', '=IF(AND(F6<>"",H6<>"",F6=H6),1,0)+IF(AND(F9<>"",H9<>"",F9=H9),1,0)+IF(AND(H10<>"",F10<>"",H10=F10),1,0)', '=F6+F9+H10', =IF(F6<H6,1,0)+IF(F9<H91,0)+IF(H10<F10,1,0), =H6+H9+F10, '=G15-H15'),
-('A', '2026-06-01', '00:00', '=IF(AND(F7<>"",H7<>"",F7=H7),1,0)+IF(AND(H9<>"",F9<>"",H9=F9),1,0)+IF(AND(H11<>"",F11<>"",H11=F11),1,0)', '=F7+H9+H11', =IF(F7<H7,1,0)+IF(H9<F9,1,0)+IF(H11<F11,1,0), =H7+F9+F11, '=G16-H16'),
-('A', '2026-06-01', '00:00', '=IF(AND(H6<>"",F6<>"",H6=F6),1,0)+IF(AND(F8<>"",H8<>"",F8=H8),1,0)+IF(AND(F11<>"",H11<>"",F11=H11),1,0)', '=H6+F8+F11', =IF(H6<F6,1,0)+IF(F8<H8,1,0)+IF(F11<H11,1,0), =F6+H8+H11, '=G17-H17'),
-('A', '2026-06-01', '00:00', '=IF(AND(H7<>"",F7<>"",H7=F7),1,0)+IF(AND(H8<>"",F8<>"",H8=F8),1,0)+IF(AND(F10<>"",H10<>"",F10=H10),1,0)', '=H7+H8+F10', =IF(H7<F7,1,0)+IF(H8<F8,1,0)+IF(F10<H10,1,0), =F7+F8+H10, '=G18-H18'),
-('B', '2026-06-12', '21:00', 'Canadá', 'Uno UEFA', 1, 1, 'Por definir'),
-('B', '2026-06-13', '21:00', 'Qatar', 'Suiza', 0, 2, 'Por definir'),
-('B', '2026-06-18', '21:00', 'Suiza', 'Uno uefa', 1, 0, 'Por definir'),
-('B', '2026-06-19', '21:00', 'Canada', 'Qatar', 2, 1, 'Por definir'),
-('B', '2026-06-24', '21:00', 'Uno uefa', 'Qatar', 0, 0, 'Por definir'),
-('B', '2026-06-24', '21:00', 'Suiza', 'Canadá', 2, 2, 'Por definir'),
-('B', '2026-06-01', '00:00', '=IF(AND(F23<>"",H23<>"",F23=H23),1,0)+IF(AND(F26<>"",H26<>"",F26=H26),1,0)+IF(AND(F28<>"",H28<>"",H28=F28),1,0)', '=F23+F26+H28', =IF(F23<H23,1,0)+IF(F26<H26,1,0)+IF(H28<F28,1,0), =H23+H26+F28, '=G32-H32'),
-('B', '2026-06-01', '00:00', '=IF(AND(F24<>"",H24<>"",F24=H24),1,0) + IF(AND(H26<>"",F26<>"",H26=F26),1,0) + IF(AND(H27<>"",F27<>"",H27=F27),1,0)', '=F24+H26+H27', =IF(F24<H24,1,0)+IF(H26<F26,1,0)+IF(H27<F27,1,0), =H24+F26+F27, '=G33-H33'),
-('B', '2026-06-01', '00:00', '=(IF(AND(H24<>"",F24<>"",H24=F24),1,0)+IF(AND(F25<>"",H25<>"",F25=H25),1,0)+IF(AND(F28<>"",H28<>"",F28=H28),1,0))', '=H24+F25+F28', =IF(H24<F24,1,0)+IF(F25<H25,1,0)+IF(F28<H28,1,0), =F24+H25+H28, '=G34-H34'),
-('B', '2026-06-01', '00:00', '=IF(AND(H23<>"",F23<>"",H23=F23),1,0)+IF(AND(H25<>"",F25<>"",H25=F25),1,0)+IF(AND(F27<>"",H27<>"",F27=H27),1,0)', '=H23+H25+F27', =IF(H23<F23,1,0)+IF(H25<F25,1,0)+IF(F27<H27,1,0), =F23+F25+H27, '=G35-H35'),
-('C', '2026-06-14', '00:00', 'Brasil', 'Marruecos', 2, 1, 'Por definir'),
-('C', '2026-06-14', '03:00', 'Haití', 'Escocia', 0, 1, 'Por definir'),
-('C', '2026-06-20', '00:00', 'Escocia', 'Marruecos', 1, 1, 'Por definir'),
-('C', '2026-06-20', '03:00', 'Brasil', 'Haití', 3, 1, 'Por definir'),
-('C', '2026-06-25', '00:00', 'Escocia', 'Brasil', 1, 3, 'Por definir'),
-('C', '2026-06-25', '00:00', 'Marruecos', 'Haití', 2, 1, 'Por definir'),
-('C', '2026-06-01', '00:00', '=IF(AND(F40<>"",F40=H40),1,0)+IF(AND(F43<>"",F43=H43),1,0)+IF(AND(H44<>"",H44=F44),1,0)', '=F40+F43+H44', =IF(F40<H40,1,0)+IF(F43<H43,1,0)+IF(H44<F44,1,0), =H40+H43+F44, '=G49-H49'),
-('C', '2026-06-01', '00:00', '=IF(AND(H40<>"",H40=F40),1,0)+IF(AND(H42<>"",H42=F42),1,0)+IF(AND(F45<>"",F45=H45),1,0)', '=H40+H42+F45', =IF(H40<F40,1,0)+IF(H42<F42,1,0)+IF(F45<H45,1,0), =F40+F42+H45, '=G50-H50'),
-('C', '2026-06-01', '00:00', '=IF(AND(H41<>"",H41=F41),1,0)+IF(AND(F42<>"",F42=H42),1,0)+IF(AND(F44<>"",F44=H44),1,0)', '=H41+F42+F44', =IF(H41<F41,1,0)+IF(F42<H42,1,0)+IF(F44<H44,1,0), =F41+H42+H44, '=G51-H51'),
-('C', '2026-06-01', '00:00', '=IF(AND(F41<>"",F41=H41),1,0)+IF(AND(H43<>"",H43=F43),1,0)+IF(AND(H45<>"",H45=F45),1,0)', '=F41+H43+H45', =IF(F41<H41,1,0)+IF(H43<F43,1,0)+IF(H45<F45,1,0), =H41+F43+F45, '=G52-H52'),
-('D', '2026-06-13', '03:00', 'EE.UU', 'Paraguay', NULL, NULL, 'Por definir'),
-('D', '2026-06-14', '06:00', 'Asutralia', 'Uno uefa', NULL, NULL, 'Por definir'),
-('D', '2026-06-19', '21:00', 'EE.UU', 'Australia', NULL, NULL, 'Por definir'),
-('D', '2026-06-20', '06:00', 'Uno uefa', 'Paraguay', NULL, NULL, 'Por definir'),
-('D', '2026-06-26', '04:00', 'Uno uefa', 'EE.UU', NULL, NULL, 'Por definir'),
-('D', '2026-06-26', '04:00', 'Paraguay', 'Australia', NULL, NULL, 'Por definir'),
-('E', '2026-06-14', '19:00', 'Alemania', 'Curazao', NULL, NULL, 'Por definir'),
-('E', '2026-06-15', '01:00', 'Costa de Marfíl', 'Ecuador', NULL, NULL, 'Por definir'),
-('E', '2026-06-20', '22:00', 'Alemania', 'Costa de Marfíl', NULL, NULL, 'Por definir'),
-('E', '2026-06-21', '02:00', 'Ecuador', 'Curazao', NULL, NULL, 'Por definir'),
-('E', '2026-06-25', '22:00', 'Ecuador', 'Alemania', NULL, NULL, 'Por definir'),
-('E', '2026-06-25', '22:00', 'Curazao', 'Costa de Marfíl', NULL, NULL, 'Por definir'),
-('F', '2026-06-14', '22:00', 'Países Bajos', 'Japón', NULL, NULL, 'Por definir'),
-('F', '2026-06-15', '04:00', 'Uno uefa', 'Túnez', NULL, NULL, 'Por definir'),
-('F', '2026-06-20', '19:00', 'Países Bajos', 'Uno uefa', NULL, NULL, 'Por definir'),
-('F', '2026-06-21', '06:00', 'Túnez', 'Japón', NULL, NULL, 'Por definir'),
-('F', '2026-06-26', '01:00', 'Japón', 'Uno eufa', NULL, NULL, 'Por definir'),
-('F', '2026-06-26', '01:00', 'Túnez', 'Países Bajos', NULL, NULL, 'Por definir'),
-('G', '2026-06-15', '21:00', 'Bélgica', 'Egipto', NULL, NULL, 'Por definir'),
-('G', '2026-06-16', '03:00', 'Irán', 'Nueva Zelanda', NULL, NULL, 'Por definir'),
-('G', '2026-06-21', '21:00', 'Bélgica', 'Irán', NULL, NULL, 'Por definir'),
-('G', '2026-06-22', '03:00', 'Nueva Zelanda', 'Egipto', NULL, NULL, 'Por definir'),
-('G', '2026-06-27', '05:00', 'Nueva Zelanda', 'Bélgica', NULL, NULL, 'Por definir'),
-('G', '2026-06-27', '05:00', 'Egipto', 'Irán', NULL, NULL, 'Por definir'),
-('H', '2026-06-15', '18:00', 'España', 'Cabo Verde', NULL, NULL, 'Por definir'),
-('H', '2026-06-16', '00:00', 'Arabia Saudí', 'Uruguay', NULL, NULL, 'Por definir'),
-('H', '2026-06-21', '18:00', 'España', 'Arabia Saudí', NULL, NULL, 'Por definir'),
-('H', '2026-06-22', '00:00', 'Uruguay', 'Cabo Verde', NULL, NULL, 'Por definir'),
-('H', '2026-06-27', '02:00', 'Uruguay', 'España', NULL, NULL, 'Por definir'),
-('H', '2026-06-27', '02:00', 'Cabo Verde', 'Arabia Saudí', NULL, NULL, 'Por definir'),
-('I', '2026-06-16', '21:00', 'Francia', 'Senegal', NULL, NULL, 'Por definir'),
-('I', '2026-06-17', '00:00', 'Uno intercont', 'Noruega', NULL, NULL, 'Por definir'),
-('I', '2026-06-22', '23:00', 'Francia', 'Uno intercont', NULL, NULL, 'Por definir'),
-('I', '2026-06-23', '02:00', 'Noruega', 'Senegal', NULL, NULL, 'Por definir'),
-('I', '2026-06-26', '21:00', 'Senegal', 'Uno intercont', NULL, NULL, 'Por definir'),
-('I', '2026-06-26', '21:00', 'Noruega', 'Francia', NULL, NULL, 'Por definir'),
-('J', '2026-06-17', '03:00', 'Argentina', 'Argelia', NULL, NULL, 'Por definir'),
-('J', '2026-06-17', '06:00', 'Austria', 'Jordania', NULL, NULL, 'Por definir'),
-('J', '2026-06-22', '19:00', 'Argentina', 'Austria', NULL, NULL, 'Por definir'),
-('J', '2026-06-23', '05:00', 'Jordania', 'Argelia', NULL, NULL, 'Por definir'),
-('J', '2026-06-28', '04:00', 'Jordania', 'Argentina', NULL, NULL, 'Por definir'),
-('J', '2026-06-28', '04:00', 'Argelia', 'Austria', NULL, NULL, 'Por definir'),
-('K', '2026-06-17', '19:00', 'Portugal', 'Uno intercont', NULL, NULL, 'Por definir'),
-('K', '2026-06-18', '04:00', 'Usbekistan', 'Colombia', NULL, NULL, 'Por definir'),
-('K', '2026-06-23', '19:00', 'Portugal', 'Usbekistan', NULL, NULL, 'Por definir'),
-('K', '2026-06-24', '04:00', 'Colombia', 'Uno intercont', NULL, NULL, 'Por definir'),
-('K', '2026-06-28', '01:30', 'Colombia', 'Portugal', NULL, NULL, 'Por definir'),
-('K', '2026-06-28', '01:30', 'Uno intercont', 'Usbekistan', NULL, NULL, 'Por definir'),
-('L', '2026-06-17', '22:00', 'Inglaterra', 'Croacia', NULL, NULL, 'Por definir'),
-('L', '2026-06-18', '01:00', 'Ghana', 'Panamá', NULL, NULL, 'Por definir'),
-('L', '2026-06-23', '22:00', 'Inglaterra', 'Ghana', NULL, NULL, 'Por definir'),
-('L', '2026-06-24', '01:00', 'Panamá', 'Croacia', NULL, NULL, 'Por definir'),
-('L', '2026-06-27', '23:00', 'Croacia', 'Ghana', NULL, NULL, 'Por definir'),
-('L', '2026-06-27', '23:00', 'Panamá', 'Inglaterra', NULL, NULL, 'Por definir');
+-- UEFA (16 cupos)
+INSERT INTO Pais (nombre, id_confederacion) VALUES 
+('Francia', 1), ('España', 1), ('Inglaterra', 1), ('Alemania', 1), ('Portugal', 1), 
+('Italia', 1), ('Paises Bajos', 1), ('Croacia', 1), ('Belgica', 1), ('Suiza', 1), 
+('Dinamarca', 1), ('Serbia', 1), ('Polonia', 1), ('Suecia', 1), ('Austria', 1), ('Escocia', 1);
+
+-- CONMEBOL (6 + 1 cupos) -> Ponemos 7
+INSERT INTO Pais (nombre, id_confederacion) VALUES 
+('Argentina', 2), ('Brasil', 2), ('Uruguay', 2), ('Colombia', 2), ('Ecuador', 2), ('Venezuela', 2), ('Peru', 2);
+
+-- CONCACAF (6 + 1 cupos) -> Ponemos 7 (Anfitriones incluidos)
+INSERT INTO Pais (nombre, id_confederacion) VALUES 
+('Estados Unidos', 3), ('México', 3), ('Canadá', 3), ('Costa Rica', 3), ('Panamá', 3), ('Jamaica', 3), ('Honduras', 3);
+
+-- CAF (9 cupos)
+INSERT INTO Pais (nombre, id_confederacion) VALUES 
+('Marruecos', 4), ('Senegal', 4), ('Egipto', 4), ('Costa de Marfil', 4), ('Nigeria', 4), 
+('Camerun', 4), ('Argelia', 4), ('Ghana', 4), ('Tunez', 4);
+
+-- AFC (8 cupos)
+INSERT INTO Pais (nombre, id_confederacion) VALUES 
+('Japon', 5), ('Iran', 5), ('Corea del Sur', 5), ('Australia', 5), ('Arabia Saudita', 5), 
+('Qatar', 5), ('Uzbekistan', 5), ('Emiratos Arabes Unidos', 5);
+
+-- OFC (1 cupo)
+INSERT INTO Pais (nombre, id_confederacion) VALUES 
+('Nueva Zelanda', 6);
+GO
+
+-- =============================================
+-- CIUDADES Y ESTADIOS (De los anfitriones)
+-- =============================================
+DECLARE @idMex INT = (SELECT id_pais FROM Pais WHERE nombre = 'México');
+DECLARE @idUSA INT = (SELECT id_pais FROM Pais WHERE nombre = 'Estados Unidos');
+DECLARE @idCan INT = (SELECT id_pais FROM Pais WHERE nombre = 'Canadá');
+
+INSERT INTO Ciudad (nombre, id_pais, es_sede) VALUES
+('Ciudad de México', @idMex, 1),
+('Guadalajara', @idMex, 1),
+('Monterrey', @idMex, 1),
+('Nueva York', @idUSA, 1),
+('Miami', @idUSA, 1),
+('Los Angeles', @idUSA, 1),
+('Toronto', @idCan, 1),
+('Vancouver', @idCan, 1);
+
+INSERT INTO Estadio (nombre, capacidad, id_ciudad) VALUES
+('Estadio Azteca', 87000, (SELECT id_ciudad FROM Ciudad WHERE nombre = 'Ciudad de México')),
+('Estadio Akron', 48000, (SELECT id_ciudad FROM Ciudad WHERE nombre = 'Guadalajara')),
+('Estadio BBVA', 53000, (SELECT id_ciudad FROM Ciudad WHERE nombre = 'Monterrey')),
+('MetLife Stadium', 82500, (SELECT id_ciudad FROM Ciudad WHERE nombre = 'Nueva York')),
+('Hard Rock Stadium', 65000, (SELECT id_ciudad FROM Ciudad WHERE nombre = 'Miami')),
+('SoFi Stadium', 70000, (SELECT id_ciudad FROM Ciudad WHERE nombre = 'Los Angeles')),
+('BMO Field', 45000, (SELECT id_ciudad FROM Ciudad WHERE nombre = 'Toronto')),
+('BC Place', 54000, (SELECT id_ciudad FROM Ciudad WHERE nombre = 'Vancouver'));
+GO
+
+-- =============================================
+-- EQUIPOS (48 Equipos)
+-- =============================================
+INSERT INTO Equipo (nombre, id_confederacion, id_pais, valor_total)
+SELECT 'Selección ' + nombre, id_confederacion, id_pais, 0 FROM Pais;
+GO
+
+-- =============================================
+-- DIRECTORES TÉCNICOS
+-- =============================================
+-- Asignaremos nombres genéricos a la mayoría y reales a los principales.
+INSERT INTO DirectorTecnico (nombre, apellido, nacionalidad, id_equipo)
+SELECT 'Director', p.nombre, p.nombre, e.id_equipo 
+FROM Equipo e JOIN Pais p ON e.id_pais = p.id_pais;
+
+-- Actualizar algunos reales
+UPDATE DirectorTecnico SET nombre = 'Lionel', apellido = 'Scaloni', nacionalidad = 'Argentina' WHERE id_equipo = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Argentina');
+UPDATE DirectorTecnico SET nombre = 'Jaime', apellido = 'Lozano', nacionalidad = 'Mexicana' WHERE id_equipo = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección México');
+UPDATE DirectorTecnico SET nombre = 'Gregg', apellido = 'Berhalter', nacionalidad = 'Estadounidense' WHERE id_equipo = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Estados Unidos');
+UPDATE DirectorTecnico SET nombre = 'Nestor', apellido = 'Lorenzo', nacionalidad = 'Argentina' WHERE id_equipo = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Colombia');
+UPDATE DirectorTecnico SET nombre = 'Luis', apellido = 'de la Fuente', nacionalidad = 'Española' WHERE id_equipo = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección España');
+UPDATE DirectorTecnico SET nombre = 'Didier', apellido = 'Deschamps', nacionalidad = 'Francesa' WHERE id_equipo = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Francia');
+GO
+
+-- =============================================
+-- JUGADORES (Para consultas y reportes)
+-- =============================================
+DECLARE @idMex INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección México');
+DECLARE @idUSA INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Estados Unidos');
+DECLARE @idCol INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Colombia');
+DECLARE @idEsp INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección España');
+DECLARE @idArg INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Argentina');
+DECLARE @idFra INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Francia');
+DECLARE @idCan INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Canadá');
+DECLARE @idBra INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Brasil');
+
+-- Jugadores México
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo) VALUES
+('Santiago', 'Gimenez', '2001-04-18', 75.0, 1.83, 'Delantero', 45000000, @idMex),
+('Fidel', 'Ambriz', '2008-03-21', 68.0, 1.75, 'Medio', 5000000, @idMex), -- Menor de 21
+('Guillermo', 'Ochoa', '1985-07-13', 78.0, 1.85, 'Portero', 1000000, @idMex);
+
+-- Jugadores USA
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo) VALUES
+('Christian', 'Pulisic', '1998-09-18', 73.0, 1.77, 'Medio', 32000000, @idUSA),
+('Gio', 'Reyna', '2006-11-13', 70.0, 1.75, 'Medio', 20000000, @idUSA), -- Menor de 21
+('Weston', 'McKennie', '1998-08-28', 84.0, 1.85, 'Medio', 25000000, @idUSA);
+
+-- Jugadores Canadá
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo) VALUES
+('Alphonso', 'Davies', '2000-11-02', 72.0, 1.83, 'Defensa', 70000000, @idCan),
+('Jonathan', 'David', '2000-01-14', 77.0, 1.75, 'Delantero', 50000000, @idCan),
+('Ismael', 'Kone', '2006-06-16', 74.0, 1.88, 'Medio', 15000000, @idCan); -- Menor de 21
+
+-- Jugadores Colombia
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo) VALUES
+('Luis', 'Diaz', '1997-01-13', 73.0, 1.80, 'Delantero', 75000000, @idCol),
+('James', 'Rodriguez', '1991-07-12', 75.0, 1.80, 'Medio', 5000000, @idCol),
+('Jhon', 'Duran', '2006-12-13', 78.0, 1.85, 'Delantero', 20000000, @idCol); -- Menor de 21
+
+-- Jugadores España
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo) VALUES
+('Pedri', 'Gonzalez', '2002-11-25', 65.0, 1.74, 'Medio', 80000000, @idEsp),
+('Lamine', 'Yamal', '2007-07-13', 65.0, 1.78, 'Delantero', 90000000, @idEsp), -- Menor de 21
+('Gavi', 'Paez', '2007-08-05', 68.0, 1.73, 'Medio', 70000000, @idEsp); -- Menor de 21
+
+-- Jugadores Argentina
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo) VALUES
+('Lionel', 'Messi', '1987-06-24', 72.0, 1.70, 'Delantero', 35000000, @idArg),
+('Julian', 'Alvarez', '2000-01-31', 71.0, 1.70, 'Delantero', 90000000, @idArg),
+('Alejandro', 'Garnacho', '2006-07-01', 68.0, 1.80, 'Delantero', 40000000, @idArg); -- Menor de 21
+
+-- Jugadores Francia
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo) VALUES
+('Kylian', 'Mbappe', '1998-12-20', 73.0, 1.78, 'Delantero', 180000000, @idFra),
+('Warren', 'Zaire-Emery', '2006-03-08', 75.0, 1.78, 'Medio', 60000000, @idFra), -- Menor de 21
+('Antoine', 'Griezmann', '1991-03-21', 72.0, 1.76, 'Delantero', 25000000, @idFra);
+
+-- Jugadores Brasil
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo) VALUES
+('Vinicius', 'Junior', '2000-07-12', 73.0, 1.76, 'Delantero', 150000000, @idBra),
+('Endrick', 'Felipe', '2007-07-21', 70.0, 1.73, 'Delantero', 45000000, @idBra), -- Menor de 21
+('Rodrygo', 'Goes', '2001-01-09', 64.0, 1.74, 'Delantero', 100000000, @idBra);
+
+-- Inyectar un par de jugadores genéricos para los otros 40 equipos para evitar que estén totalmente vacíos
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo)
+SELECT 'Jugador1', p.nombre, '2000-01-01', 70.0, 1.75, 'Medio', 1000000, e.id_equipo 
+FROM Equipo e JOIN Pais p ON e.id_pais = p.id_pais 
+WHERE e.id_equipo NOT IN (@idMex, @idUSA, @idCol, @idEsp, @idArg, @idFra, @idCan, @idBra);
+
+INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo)
+SELECT 'Jugador2', p.nombre, '2007-01-01', 70.0, 1.75, 'Delantero', 1500000, e.id_equipo 
+FROM Equipo e JOIN Pais p ON e.id_pais = p.id_pais 
+WHERE e.id_equipo NOT IN (@idMex, @idUSA, @idCol, @idEsp, @idArg, @idFra, @idCan, @idBra);
+GO
+
+-- =============================================
+-- ACTUALIZAR VALORES DE EQUIPO
+-- =============================================
+UPDATE Equipo SET valor_total = (SELECT ISNULL(SUM(valor), 0) FROM Jugador WHERE Jugador.id_equipo = Equipo.id_equipo);
+GO
+
+-- =============================================
+-- ASIGNACIÓN DE GRUPOS (Simulación de Grupos A, B, C, D)
+-- =============================================
+DECLARE @idMex INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección México');
+DECLARE @idUSA INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Estados Unidos');
+DECLARE @idCan INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Canadá');
+DECLARE @idCol INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Colombia');
+DECLARE @idArg INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Argentina');
+DECLARE @idBra INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Brasil');
+DECLARE @idEsp INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección España');
+DECLARE @idFra INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Francia');
+
+-- Grupo A
+INSERT INTO GrupoEquipo (id_grupo, id_equipo) VALUES (1, @idMex), (1, @idCol), (1, @idFra);
+-- Grupo B
+INSERT INTO GrupoEquipo (id_grupo, id_equipo) VALUES (2, @idUSA), (2, @idEsp), (2, @idBra);
+-- Grupo C
+INSERT INTO GrupoEquipo (id_grupo, id_equipo) VALUES (3, @idCan), (3, @idArg);
+GO
+
+-- =============================================
+-- PARTIDOS (Fase de Grupos)
+-- =============================================
+DECLARE @idMex INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección México');
+DECLARE @idUSA INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Estados Unidos');
+DECLARE @idCan INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Canadá');
+DECLARE @idCol INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Colombia');
+DECLARE @idArg INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Argentina');
+DECLARE @idBra INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Brasil');
+DECLARE @idEsp INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección España');
+DECLARE @idFra INT = (SELECT id_equipo FROM Equipo WHERE nombre = 'Selección Francia');
+
+DECLARE @idEstAzteca INT = (SELECT id_estadio FROM Estadio WHERE nombre = 'Estadio Azteca');
+DECLARE @idEstMiami INT = (SELECT id_estadio FROM Estadio WHERE nombre = 'Hard Rock Stadium');
+DECLARE @idEstToronto INT = (SELECT id_estadio FROM Estadio WHERE nombre = 'BMO Field');
+
+INSERT INTO Partido (fecha, id_equipo_local, id_equipo_visitante, id_estadio, id_grupo) VALUES
+('2026-06-11 20:00:00', @idMex, @idFra, @idEstAzteca, 1),
+('2026-06-15 18:00:00', @idCol, @idMex, @idEstAzteca, 1),
+('2026-06-12 21:00:00', @idUSA, @idEsp, @idEstMiami, 2),
+('2026-06-16 19:00:00', @idBra, @idUSA, @idEstMiami, 2),
+('2026-06-13 17:00:00', @idCan, @idArg, @idEstToronto, 3);
 GO
