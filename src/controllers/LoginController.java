@@ -63,8 +63,7 @@ public class LoginController {
 				psBitacora.executeUpdate();
 
 				// Pasar datos del usuario al menú
-				MenuPrincipalAdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"));
-                                        controllers.AdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"), rol);
+				controllers.AdministradorController.setUsuarioActual(rs.getInt("id_usuario"), rs.getString("username"), rol);
 
 				// Abrir menú según rol
 				FXMLLoader loader = new FXMLLoader(getClass().getResource(nombreVista));
