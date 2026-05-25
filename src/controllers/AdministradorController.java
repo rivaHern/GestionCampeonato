@@ -727,6 +727,17 @@ public class AdministradorController {
 			return;
 		}
 		try (Connection conn = Conexion.getConexion()) {
+			// Validación de duplicado
+			try (PreparedStatement psChk = conn.prepareStatement(
+				"SELECT COUNT(*) FROM Equipo WHERE nombre=?")) {
+				psChk.setString(1, nombre);
+				ResultSet rsChk = psChk.executeQuery();
+				if (rsChk.next() && rsChk.getInt(1) > 0) {
+					mostrarAlerta("Error", "Ya existe un equipo con ese nombre.");
+					return;
+				}
+			}
+
 			int idConf = 0;
 			try (PreparedStatement ps2 = conn.prepareStatement("SELECT id_confederacion FROM Confederacion WHERE nombre = ? OR siglas = ?")) {
 				ps2.setString(1, confederacion); ps2.setString(2, confederacion);
@@ -749,10 +760,42 @@ public class AdministradorController {
 	void actualizarEquipos(ActionEvent event) {
 		if (idEquipoSeleccionado == -1) { mostrarAlerta("Error", "Seleccione un equipo."); return; }
 		String nombre = textEquipoPais.getText().trim();
-		try (Connection conn = Conexion.getConexion();
-		     PreparedStatement ps = conn.prepareStatement("UPDATE Equipo SET nombre=? WHERE id_equipo=?")) {
-			ps.setString(1, nombre); ps.setInt(2, idEquipoSeleccionado);
-			ps.executeUpdate();
+		String director = textEquipoDirectorTecnico.getText().trim();
+		// Separar nombre y apellido del director
+		String[] partes = director.split(" ", 2);
+		String nombreDT = partes[0];
+		String apellidoDT = partes.length > 1 ? partes[1] : "";
+		try (Connection conn = Conexion.getConexion()) {
+			try (PreparedStatement ps = conn.prepareStatement("UPDATE Equipo SET nombre=? WHERE id_equipo=?")) {
+				ps.setString(1, nombre); ps.setInt(2, idEquipoSeleccionado);
+				ps.executeUpdate();
+			}
+			// Obtener la nacionalidad del equipo
+			String nacionalidad = "";
+			try (PreparedStatement psPais = conn.prepareStatement("SELECT p.nombre FROM Pais p JOIN Equipo e ON e.id_pais = p.id_pais WHERE e.id_equipo=?")) {
+				psPais.setInt(1, idEquipoSeleccionado);
+				ResultSet rsPais = psPais.executeQuery();
+				if (rsPais.next()) nacionalidad = rsPais.getString("nombre");
+			}
+			// Verificar si existe director técnico
+			int existeDT = 0;
+			try (PreparedStatement psChk = conn.prepareStatement("SELECT COUNT(*) FROM DirectorTecnico WHERE id_equipo=?")) {
+				psChk.setInt(1, idEquipoSeleccionado);
+				ResultSet rsChk = psChk.executeQuery();
+				if (rsChk.next()) existeDT = rsChk.getInt(1);
+			}
+			// Si existe, hacer UPDATE; si no, hacer INSERT
+			if (existeDT > 0) {
+				try (PreparedStatement ps = conn.prepareStatement("UPDATE DirectorTecnico SET nombre=?, apellido=?, nacionalidad=? WHERE id_equipo=?")) {
+					ps.setString(1, nombreDT); ps.setString(2, apellidoDT); ps.setString(3, nacionalidad); ps.setInt(4, idEquipoSeleccionado);
+					ps.executeUpdate();
+				}
+			} else {
+				try (PreparedStatement ps = conn.prepareStatement("INSERT INTO DirectorTecnico (nombre, apellido, nacionalidad, id_equipo) VALUES (?, ?, ?, ?)")) {
+					ps.setString(1, nombreDT); ps.setString(2, apellidoDT); ps.setString(3, nacionalidad); ps.setInt(4, idEquipoSeleccionado);
+					ps.executeUpdate();
+				}
+			}
 			limpiarCamposEquipos(); cargarEquipos();
 			mostrarInfo("Exito", "Equipo actualizado.");
 		} catch (Exception e) {
@@ -883,9 +926,14 @@ public class AdministradorController {
 		String pesoStr = textPesoGJ.getText().trim();
 		String estaturaStr = textEstaturaGJ.getText().trim();
 		String costoStr = textCostoGJ.getText().trim();
-		String equipo = ((ComboBox<String>)comboxEquipoGJ).getValue();
+		String edadStr = textEdadGJ != null ? textEdadGJ.getText().trim() : "";
+                String equipo = ((ComboBox<String>)comboxEquipoGJ).getValue();
 		if (nombre.isEmpty() || pesoStr.isEmpty() || estaturaStr.isEmpty() || costoStr.isEmpty() || equipo == null) {
 			mostrarAlerta("Error", "Complete todos los campos obligatorios.");
+			return;
+		}
+		if (idJugadorSeleccionado != -1) {
+			mostrarAlerta("Error", "Hay un jugador seleccionado. Deseleccione la tabla o use Actualizar.");
 			return;
 		}
 		try (Connection conn = Conexion.getConexion()) {
@@ -895,15 +943,35 @@ public class AdministradorController {
 				ResultSet rs2 = ps2.executeQuery();
 				if (rs2.next()) idEquipo = rs2.getInt("id_equipo");
 			}
+
+			// Validación de duplicado
+			try (PreparedStatement psChk = conn.prepareStatement(
+				"SELECT COUNT(*) FROM Jugador WHERE nombre=? AND id_equipo=?")) {
+				psChk.setString(1, nombre);
+				psChk.setInt(2, idEquipo);
+				ResultSet rsChk = psChk.executeQuery();
+				if (rsChk.next() && rsChk.getInt(1) > 0) {
+					mostrarAlerta("Error", "Ya existe un jugador con ese nombre en ese equipo.");
+					return;
+				}
+			}
+
 			try (PreparedStatement ps = conn.prepareStatement(
-				"INSERT INTO Jugador (nombre, apellido, peso, estatura, posicion, valor, id_equipo) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+				"INSERT INTO Jugador (nombre, apellido, fecha_nacimiento, peso, estatura, posicion, valor, id_equipo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
+				java.time.LocalDate fechaNac = (!edadStr.isEmpty() && edadStr.matches("\\d+"))
+				    ? java.time.LocalDate.now().minusYears(Integer.parseInt(edadStr))
+				    : null;
 				ps.setString(1, nombre);
 				ps.setString(2, nombre);
-				ps.setDouble(3, Double.parseDouble(pesoStr));
-				ps.setDouble(4, Double.parseDouble(estaturaStr));
-				ps.setString(5, "Jugador");
-				ps.setDouble(6, Double.parseDouble(costoStr));
-				ps.setInt(7, idEquipo);
+				if (fechaNac != null)
+				    ps.setDate(3, java.sql.Date.valueOf(fechaNac));
+				else
+				    ps.setNull(3, java.sql.Types.DATE);
+				ps.setDouble(4, Double.parseDouble(pesoStr));
+				ps.setDouble(5, Double.parseDouble(estaturaStr));
+				ps.setString(6, "Jugador");
+				ps.setDouble(7, Double.parseDouble(costoStr));
+				ps.setInt(8, idEquipo);
 				ps.executeUpdate();
 			}
 			limpiarCamposJugadores();
@@ -920,7 +988,8 @@ public class AdministradorController {
 			mostrarAlerta("Error", "Seleccione un jugador de la tabla.");
 			return;
 		}
-		String equipo = ((ComboBox<String>)comboxEquipoGJ).getValue();
+		String edadStr = textEdadGJ != null ? textEdadGJ.getText().trim() : "";
+                String equipo = ((ComboBox<String>)comboxEquipoGJ).getValue();
 		try (Connection conn = Conexion.getConexion()) {
 			int idEquipo = 0;
 			try (PreparedStatement ps2 = conn.prepareStatement("SELECT id_equipo FROM Equipo WHERE nombre = ?")) {
@@ -1095,6 +1164,13 @@ public class AdministradorController {
 			mostrarAlerta("Error", "Complete todos los campos.");
 			return;
 		}
+
+		// Validación: equipos no pueden ser iguales
+		if (local.equals(visitante)) {
+			mostrarAlerta("Error", "El equipo local y visitante no pueden ser el mismo.");
+			return;
+		}
+
 		try (Connection conn = Conexion.getConexion()) {
 			int idLocal = 0, idVisitante = 0, idEstadio = 0, idGrupo = 0;
 			try (PreparedStatement ps = conn.prepareStatement("SELECT id_equipo FROM Equipo WHERE nombre=?")) {
@@ -1109,7 +1185,23 @@ public class AdministradorController {
 			try (PreparedStatement ps = conn.prepareStatement("SELECT id_grupo FROM Grupo WHERE nombre=?")) {
 				ps.setString(1, grupo); ResultSet rs = ps.executeQuery(); if (rs.next()) idGrupo = rs.getInt(1);
 			}
+
+			// Validación de duplicado
+			try (PreparedStatement psChk = conn.prepareStatement(
+				"SELECT COUNT(*) FROM Partido WHERE id_equipo_local=? AND id_equipo_visitante=? AND CAST(fecha AS DATE)=CAST(? AS DATE)")) {
+				psChk.setInt(1, idLocal);
+				psChk.setInt(2, idVisitante);
+				psChk.setTimestamp(3,
+					java.sql.Timestamp.valueOf(DatePartido.getValue().atStartOfDay()));
+				ResultSet rsChk = psChk.executeQuery();
+				if (rsChk.next() && rsChk.getInt(1) > 0) {
+					mostrarAlerta("Error", "Ya existe ese partido en esa fecha.");
+					return;
+				}
+			}
+
 			try (PreparedStatement ps = conn.prepareStatement(
+
 				"INSERT INTO Partido (fecha, id_equipo_local, id_equipo_visitante, id_estadio, id_grupo) VALUES (?,?,?,?,?)")) {
 				ps.setTimestamp(1, java.sql.Timestamp.valueOf(DatePartido.getValue().atStartOfDay()));
 				ps.setInt(2, idLocal); ps.setInt(3, idVisitante);
